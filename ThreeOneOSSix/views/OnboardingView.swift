@@ -152,6 +152,35 @@ struct OnboardingView: View {
         .frame(maxWidth: .infinity, alignment: .top)
     }
 
+    private func versionRow(icon: String, title: String, value: String, color: Color) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                Image(systemName: icon).foregroundStyle(color)
+                Text(title).fontWeight(.semibold)
+                Spacer()
+                Text(value)
+                    .font(.subheadline.monospaced())
+                    .foregroundStyle(.secondary)
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 10) {
+                    Image(systemName: icon)
+                        .foregroundStyle(color)
+                    Text(title)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.primary)
+                }
+                Text(value)
+                    .font(.subheadline.monospaced())
+                    .foregroundStyle(.secondary)
+                    .padding(.leading, 26)
+            }
+        }
+        .font(.subheadline)
+        .padding(12)
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
     private var controls: some View {
         VStack(spacing: 12) {
             ViewThatFits(in: .horizontal) {
