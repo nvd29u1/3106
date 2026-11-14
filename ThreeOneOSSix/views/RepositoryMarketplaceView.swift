@@ -289,7 +289,7 @@ struct LegacyRepositorySourcesView: View {
         HStack(alignment: .top, spacing: 12) {
             RepositorySourceIcon(
                 repository: store.repository(for: source.id),
-                fallbackText: source.manifestURL.host ?? "3106"
+                fallbackText: source.manifestURL.host ?? "NVD 1506"
             )
             VStack(alignment: .leading, spacing: 3) {
                 Text(

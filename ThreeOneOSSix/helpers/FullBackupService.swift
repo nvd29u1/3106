@@ -7,7 +7,7 @@ import Foundation
 /// - MobileGestalt cache plist
 /// - ConfigurationProfiles (Supervised Mode source of truth)
 /// - TelephonyUI keypad theme PNGs (current theme container)
-/// - The patch workspace (Documents/3106/Patches)
+/// - The patch workspace (Documents/NVD 1506/Patches)
 /// - The BackupCenter snapshot index itself
 enum FullBackupService {
 
@@ -40,7 +40,7 @@ enum FullBackupService {
 
     static var backupsDirectory: URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return docs.appendingPathComponent("3106/FullBackups", isDirectory: true)
+        return docs.appendingPathComponent("NVD 1506/FullBackups", isDirectory: true)
     }
 
     // MARK: - Scope
@@ -89,7 +89,7 @@ enum FullBackupService {
         }
 
         // 4. BackupCenter's own index — the LIVE root is
-        // Application Support/3106/Backups (BackupCenter.rootURL), not the
+        // Application Support/NVD 1506/Backups (BackupCenter.rootURL), not the
         // Documents path this used to point at.
         let backupRoot = BackupCenter.shared.rootURL
         if FileManager.default.fileExists(atPath: backupRoot.path) {
@@ -246,7 +246,7 @@ enum FullBackupService {
 
         var restoredBackupCenter = false
         // Track aside parents so each gets pruned (asides live next to their
-        // target: system Caches dirs, container roots, Documents/3106).
+        // target: system Caches dirs, container roots, Documents/NVD 1506).
         var asideParents = Set<String>()
 
         for entry in entries {

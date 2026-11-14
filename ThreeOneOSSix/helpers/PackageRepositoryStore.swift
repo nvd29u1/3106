@@ -179,7 +179,7 @@ final class PackageRepositoryStore: ObservableObject {
     }
 
     private func synchronizeDefaultSources() async {
-        // 3106 ships no upstream source catalog; users add their own sources.
+        // NVD 1506 ships no upstream source catalog; users add their own sources.
         log("repository: default catalog disabled")
     }
 
@@ -373,7 +373,7 @@ final class PackageRepositoryStore: ObservableObject {
                 identifier: "clean-layout",
                 kind: .patch,
                 name: "Clean Layout",
-                author: "3106",
+                author: "NVD 1506",
                 version: "1.2.0",
                 summary: "A compact layout patch for a cleaner app interface.",
                 details: "Simulator preview package used to verify marketplace layout.",
@@ -402,7 +402,7 @@ final class PackageRepositoryStore: ObservableObject {
                 identifier: "profile-switcher",
                 kind: .patch,
                 name: "Profile Switcher",
-                author: "3106 Community",
+                author: "NVD 1506 Community",
                 version: "1.0.0",
                 summary: "A portable workspace example with multiple bundle targets.",
                 details: nil,
@@ -426,8 +426,8 @@ final class PackageRepositoryStore: ObservableObject {
         ]
         sources = [source]
         repositories[source.id] = PackageRepository(
-            identifier: "com.qingtang.3106.preview",
-            name: "3106 Preview",
+            identifier: "com.NVD.1506.preview",
+            name: "NVD 1506 Preview",
             summary: "Simulator-only marketplace preview",
             iconURL: nil,
             sourceURL: sourceURL,
@@ -501,13 +501,13 @@ enum PackageRepositoryNetworkClient {
         return try Data(contentsOf: fileURL, options: .mappedIfSafe)
     }
 
-    /// Download an upstream IPA into Documents/3106/IPAs, overwriting a
+    /// Download an upstream IPA into Documents/NVD 1506/IPAs, overwriting a
     /// previous release of the same app (bundle identifier is the name key).
     /// 512 MB cap: upstream releases are single-digit MB to a few hundred;
     /// anything larger is almost certainly a wrong link.
     static func downloadIPA(_ package: RepositoryPackage) async throws -> URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let dir = docs.appendingPathComponent("3106/IPAs", isDirectory: true)
+        let dir = docs.appendingPathComponent("NVD 1506/IPAs", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let safeName = package.identifier
             .replacingOccurrences(of: "/", with: "_")
@@ -587,7 +587,7 @@ enum PackageRepositoryNetworkClient {
         defer { session.invalidateAndCancel() }
 
         var request = URLRequest(url: url)
-        request.setValue("3106", forHTTPHeaderField: "User-Agent")
+        request.setValue("NVD-1506", forHTTPHeaderField: "User-Agent")
         let (temporaryURL, response) = try await session.download(for: request)
         guard let response = response as? HTTPURLResponse,
               (200..<300).contains(response.statusCode),

@@ -1,3 +1,9 @@
+> **NVD 1506 — bản cá nhân hoá (tiếng Việt) từ 3106 của QuinnTang74.**
+> Gốc: https://github.com/QuinnTang74/3106 (GPL-3.0). Bản này đổi tên app, bundle ID
+> (com.NVD.1506), App Group (group.com.NVD.1506), icon lợn + màu mận, chỉ giữ tiếng
+> Việt, và thêm đuôi patch .nvd (vẫn mở được .3105/.3106). Ghi công tác giả gốc giữ
+> trong LICENSE và NOTICE.md.
+
 <p align="center">
   <img src="docs/images/app-icon.png" width="120" alt="3106">
 </p>
@@ -18,8 +24,8 @@
 
 | Item | Value |
 | --- | --- |
-| Version | **3.2.5** (stable · same-version rebuild) |
-| Current release | **v3.2.5** (build 24, rebuilt 2026-11-14: notification sound replacement added; field-plist imports now merge as patches, backup metadata validation, explicit edits win over presets, disabled toggles no longer delete keys, issue #3 static regression guard; previous package backed up under `dist/backups/`, SHA256 per `dist/SHA256SUMS.txt`) |
+| Version | **3.2.5** (stable) |
+| Current release | **v3.2.5** (build 24, fixes: tendies import overload-resolution defect + cleaner symlink rejections + log build stamps) |
 | Supported systems | iOS 17.0–18.7.1 · 26.0–26.6.1 · 26.7–26.7.2 · 27.0–27.3 beta 1 (verified) |
 | Access backend | kernel / `bad_query` / `worse_query` (selected automatically by OS version) |
 | UI languages | Simplified Chinese · English · Vietnamese |
@@ -35,7 +41,6 @@
 | CacheExtra field editor | 8 types (incl. Array/Dictionary XML fragments), search/add/edit/remove, plist import/export, type-faithful |
 | Region & Siri AI | Region triplet + regulatory model (verified machine table), native Siri AI / experimental mode, anti-bounce protection |
 | Arbitrary file replace | Pick app → browse container directories → pick file → optional backup → replace; persistent log, one-tap restore, saved presets; protected-path rails |
-| Notification sounds | Per-app sound-path table (manual entry), custom audio replacement (aiff/aif/caf/m4a/wav ≤20MB); automatic backup + one-tap restore from the replace log; `.data` picker fallback so side-loaded builds can still select audio |
 | Supervised Mode | ConfigurationProfiles `IsSupervised` toggle (MDM warning + risk confirmation) |
 | App save backups | Documents + Library/Preferences as `.3106save`; restore re-matches the container by bundle ID after reinstall |
 | Backup tab (top level) | Auto-backup explainer, snapshot overview, full backup `.3106fullbackup` (manifest + one-tap restore), save-archive preview, activity timeline |
@@ -52,7 +57,6 @@
 
 | Version | Highlights |
 | --- | --- |
-| **3.2.5 rebuild** | Same-version rebuild: notification sound replacement added; field-plist import is now a patch-style merge (device keys preserved, GestaltX #138/#131/#132 semantics), backup metadata validation (#134), `.3106cfg` import errors surfaced + App Group inbox fallback (#133), explicit edits win over presets (#137), disabled toggles no longer delete keys, issue #3 static regression guard; SHA256 per `dist/SHA256SUMS.txt` |
 | **3.2.4** | Feature completion: dual-app folder migration (merge/replace/exchange, checkpoint resume, config packages) + GestaltX appearance suite (lock screen text, launch artwork, island layout, Siri preservation) + update-check hardening |
 | **3.2.5** | Fixes: `.tendies` import overload-resolution defect (issue #3, the true root cause of all descriptors being skipped), cleaner `/var` symlink rejections (all 56 apps failed), log build stamps, CI artifact sentinel |
 | **3.2.3** | Stable: fixed every on-device `.tendies` import failing with noDescriptors (issue #2: path containment no longer depends on symlink resolution; any /var vs /private/var spelling mix is accepted) |
@@ -105,7 +109,7 @@ The IPA is unsigned and must be signed with your own tool (LCSign / Sideloadly /
 
 **iOS 26.7+ / 27.x must keep the App Group entitlement** (Sideloadly drops it; use Impactor or Xcode).
 
-Current build: `3106-3.2.5-unsigned.ipa` / build 24. This is a same-version rebuild; use the latest SHA256 in `dist/SHA256SUMS.txt` to distinguish it from the previous package, whose backup lives in `dist/backups/`.
+Current build: `3106-3.2.4-unsigned.ipa` (SHA256 `4f47344764422731bd33b77f3aad8d39d25f67ef8a564bee9e2c5ced0d4c6fae`).
 
 ## License
 

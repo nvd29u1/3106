@@ -78,15 +78,6 @@
 		3105E21A /* FileReplaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105E11A; };
 		3105E21B /* GestaltCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105E11B; };
 		3105E21C /* AppVersionComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105E11C; };
-		3106G203 /* GestaltPlistMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G103; };
-		3106G202 /* GestaltValueParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G102; };
-		3106G201 /* IdentityComparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G101; };
-		3106G204 /* BackupMetadataPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G104; };
-		3106G206 /* GestaltExplicitEdits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G106; };
-		3106N201 /* NotificationSoundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106N101; };
-		3106G208 /* NotificationSoundService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G108; };
-		3106G207 /* NotificationSoundPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G107; };
-		3106G205 /* GestaltEditPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G105; };
 		3105E207 /* AppCardList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105E107; };
 		3105F200 /* wallpaper_zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 3105F100; };
 		3105F201 /* WallpaperLabModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105F102; };
@@ -253,15 +244,6 @@
 		3105E11A /* FileReplaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileReplaceView.swift; sourceTree = "<group>"; };
 		3105E11B /* GestaltCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltCardsView.swift; sourceTree = "<group>"; };
 		3105E11C /* AppVersionComparison.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionComparison.swift; sourceTree = "<group>"; };
-		3106G103 /* GestaltPlistMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltPlistMerge.swift; sourceTree = "<group>"; };
-		3106G102 /* GestaltValueParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltValueParser.swift; sourceTree = "<group>"; };
-		3106G101 /* IdentityComparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityComparator.swift; sourceTree = "<group>"; };
-		3106G104 /* BackupMetadataPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupMetadataPolicy.swift; sourceTree = "<group>"; };
-		3106G106 /* GestaltExplicitEdits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltExplicitEdits.swift; sourceTree = "<group>"; };
-		3106N101 /* NotificationSoundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSoundView.swift; sourceTree = "<group>"; };
-		3106G108 /* NotificationSoundService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSoundService.swift; sourceTree = "<group>"; };
-		3106G107 /* NotificationSoundPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSoundPolicy.swift; sourceTree = "<group>"; };
-		3106G105 /* GestaltEditPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltEditPolicy.swift; sourceTree = "<group>"; };
 		3105E107 /* AppCardList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCardList.swift; sourceTree = "<group>"; };
 		3105F100 /* wallpaper_zip.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wallpaper_zip.c; sourceTree = "<group>"; };
 		3105F101 /* wallpaper_zip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wallpaper_zip.h; sourceTree = "<group>"; };
@@ -285,9 +267,7 @@
 		3105L103 /* RepositoryHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryHomeView.swift; sourceTree = "<group>"; };
 		3105L104 /* RepositorySourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositorySourcesView.swift; sourceTree = "<group>"; };
 		3105L105 /* RepositoryPresentationSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryPresentationSupport.swift; sourceTree = "<group>"; };
-		3105A121 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3105A122 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
-		3105B123 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3106B100 /* BackupCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupCenter.swift; sourceTree = "<group>"; };
 		3106B101 /* BackupCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupCenterView.swift; sourceTree = "<group>"; };
 		3106H101 /* FeatureHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureHubView.swift; sourceTree = "<group>"; };
@@ -445,7 +425,6 @@
 				3106T313 /* MigrationProgressView.swift */,
 				3106T314 /* MigrationResumeView.swift */,
 				3106T315 /* MigrationConfigBackupView.swift */,
-				3106N101 /* NotificationSoundView.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -493,14 +472,6 @@
 				3105E116 /* ActivityHistory.swift */,
 				3105E117 /* AltStoreSourceAdapter.swift */,
 				3105E11C /* AppVersionComparison.swift */,
-				3106G103 /* GestaltPlistMerge.swift */,
-				3106G102 /* GestaltValueParser.swift */,
-				3106G101 /* IdentityComparator.swift */,
-				3106G104 /* BackupMetadataPolicy.swift */,
-				3106G106 /* GestaltExplicitEdits.swift */,
-				3106G108 /* NotificationSoundService.swift */,
-				3106G107 /* NotificationSoundPolicy.swift */,
-				3106G105 /* GestaltEditPolicy.swift */,
 				3105E119 /* FileReplaceService.swift */,
 				3105E103 /* CleanerSafetyPolicy.swift */,
 				3105E104 /* CleanerHistory.swift */,
@@ -603,12 +574,10 @@
 			};
 			buildConfigurationList = 3105AA00;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = vi;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				vi,
-				"zh-Hans",
 				Base,
 			);
 			mainGroup = 3105A400;
@@ -768,15 +737,6 @@
 				3106T516,
 				3106T517,
 				3106T518,
-				3106G203,
-				3106G202,
-				3106G201,
-				3106G204,
-				3106G206,
-				3106N201,
-				3106G208,
-				3106G207,
-				3106G205,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -786,9 +746,7 @@
 		3105A120 /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				3105A121 /* en */,
 				3105A122 /* vi */,
-				3105B123 /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -821,7 +779,7 @@
 				);
 				MARKETING_VERSION = 3.2.5;
 				OTHER_LDFLAGS = "-lz";
-				PRODUCT_BUNDLE_IDENTIFIER = com.qingtang.3106;
+				PRODUCT_BUNDLE_IDENTIFIER = com.NVD.1506;
 				PRODUCT_NAME = 3106;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "ThreeOneOSSix/ThreeOneOSSix-Bridging-Header.h";
@@ -855,7 +813,7 @@
 				);
 				MARKETING_VERSION = 3.2.5;
 				OTHER_LDFLAGS = "-lz";
-				PRODUCT_BUNDLE_IDENTIFIER = com.qingtang.3106;
+				PRODUCT_BUNDLE_IDENTIFIER = com.NVD.1506;
 				PRODUCT_NAME = 3106;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "ThreeOneOSSix/ThreeOneOSSix-Bridging-Header.h";

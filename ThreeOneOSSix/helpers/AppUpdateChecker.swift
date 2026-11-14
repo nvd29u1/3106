@@ -7,10 +7,10 @@ enum AppUpdateChecker {
     /// unauthenticated API (60 req/h per IP); 30 minutes matches the typical
     /// session-cadence a user needs to learn about a fresh release.
     static let foregroundThrottleInterval: TimeInterval = 30 * 60
-    // Points at the 3106 fork; a missing repository simply disables update
-    // prompts until the final distribution address is provided.
-    static let apiURL = URL(string: "https://api.github.com/repos/QuinnTang74/3106/releases/latest")!
-    static let fallbackURL = URL(string: "https://github.com/QuinnTang74/3106/releases/latest")!
+    // Points at the NVD 1506 fork (nvd29u1/3106); a missing repository simply
+    // disables update prompts until the final distribution address is provided.
+    static let apiURL = URL(string: "https://api.github.com/repos/nvd29u1/3106/releases/latest")!
+    static let fallbackURL = URL(string: "https://github.com/nvd29u1/3106/releases/latest")!
 
     struct Offer: Identifiable {
         let id = UUID()
@@ -19,7 +19,8 @@ enum AppUpdateChecker {
     }
 
     static var currentVersion: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        Bundle.main.object(forInfoDictionaryKey: "AppReleaseDisplayVersion") as? String
+            ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
             ?? "0"
     }
 
@@ -35,7 +36,7 @@ enum AppUpdateChecker {
             // compare versions directly.
             var request = URLRequest(url: apiURL)
             request.timeoutInterval = 15
-            request.setValue("3106", forHTTPHeaderField: "User-Agent")
+            request.setValue("NVD-1506", forHTTPHeaderField: "User-Agent")
             request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
             guard
                 let (data, _) = try? await URLSession.shared.data(for: request),
@@ -88,7 +89,7 @@ enum AppUpdateChecker {
     static func checkWithOutcome() async -> CheckOutcome {
         var request = URLRequest(url: apiURL)
         request.timeoutInterval = 15
-        request.setValue("3106", forHTTPHeaderField: "User-Agent")
+        request.setValue("NVD-1506", forHTTPHeaderField: "User-Agent")
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
 
         let (data, response): (Data, URLResponse)
@@ -142,7 +143,7 @@ enum AppUpdateChecker {
     static func check() async -> Offer? {
         var request = URLRequest(url: apiURL)
         request.timeoutInterval = 15
-        request.setValue("3106", forHTTPHeaderField: "User-Agent")
+        request.setValue("NVD-1506", forHTTPHeaderField: "User-Agent")
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         do {
             let (data, response) = try await URLSession.shared.data(for: request)

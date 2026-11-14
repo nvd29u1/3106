@@ -38,9 +38,9 @@ enum CleanerSafetyPolicy {
     ]
 
     /// Bundle IDs the cleaner must never select or clean (port of Erosion's
-    /// protectedBundleIDs, extended for 3106).
+    /// protectedBundleIDs, extended for NVD 1506).
     static let protectedBundleIDs: Set<String> = [
-        "com.qingtang.3106",
+        "com.NVD.1506",
         "com.apple.springboard",
         "com.apple.Preferences",
         "com.apple.mobilephone",

@@ -9,11 +9,10 @@ struct ThreeOneOSSixApp: App {
     @StateObject private var patchStore = PatchProjectStore()
     @StateObject private var repositoryStore = PackageRepositoryStore()
     @StateObject private var migrationTaskCenter = MigrationTaskCenter()
-    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
+    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.vietnamese.rawValue
     @State private var showOnboarding = OnboardingStore.shouldShow()
     @State private var showAttribution = false
     @State private var updateOffer: AppUpdateChecker.Offer?
-    @State private var configImportError: String?
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -21,45 +20,13 @@ struct ThreeOneOSSixApp: App {
         setupLogCapture()
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let appBuild = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
-        log("app: 3106 \(appVersion) (\(appBuild)) launching — iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) \(AppInfo.machineName)")
+        log("app: NVD 1506 \(appVersion) (\(appBuild)) launching — iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) \(AppInfo.machineName)")
         SandboxAccess.prepare()
         TempSpaceRegistry.purgeExpired()
     }
 
     private var language: AppLanguage {
-        AppLanguage(rawValue: languageCode) ?? .english
-    }
-
-    private func importConfigPackage(at url: URL) {
-        do {
-            _ = try MigrationConfigBackupService.importPackage(at: url)
-            migrationTaskCenter.refreshStoredSets()
-            configImportError = nil
-            log("migration: config package imported — \(url.lastPathComponent)")
-        } catch {
-            log("migration: config package import failed — \(error)")
-            configImportError = language.errorText(error)
-        }
-    }
-
-    /// GestaltX #133: a share extension may drop packages into the App Group
-    /// inbox without delivering an onOpenURL callback. Read whichever App
-    /// Group the side-loaded build was actually signed with.
-    private func importSharedConfigPackages() {
-        guard let group = SandboxAccess.appGroup,
-              let inbox = FileManager.default
-                .containerURL(forSecurityApplicationGroupIdentifier: group)?
-                .appendingPathComponent("SharedConfigInbox", isDirectory: true) else { return }
-        let urls = (try? FileManager.default.contentsOfDirectory(
-            at: inbox,
-            includingPropertiesForKeys: nil,
-            options: [.skipsHiddenFiles]
-        )) ?? []
-        for url in urls where url.pathExtension.lowercased()
-            == MigrationConfigBackupService.packageExtension {
-            importConfigPackage(at: url)
-            try? FileManager.default.removeItem(at: url)
-        }
+        AppLanguage(rawValue: languageCode) ?? .vietnamese
     }
 
     private func checkForUpdate() {
@@ -116,19 +83,6 @@ struct ThreeOneOSSixApp: App {
             .sheet(isPresented: $showAttribution) {
                 DisplayAttributionSheet()
             }
-            .alert(
-                language.text("config.import_error.title"),
-                isPresented: .init(
-                    get: { configImportError != nil },
-                    set: { if !$0 { configImportError = nil } }
-                )
-            ) {
-                Button(language.text("common.ok"), role: .cancel) {
-                    configImportError = nil
-                }
-            } message: {
-                Text(configImportError ?? "")
-            }
             .alert(item: $updateOffer) { offer in
                 Alert(
                     title: Text(language.text("update.title")),
@@ -147,7 +101,6 @@ struct ThreeOneOSSixApp: App {
                     checkForUpdate()
                 }
                 migrationTaskCenter.refreshPendingResumes()
-                importSharedConfigPackages()
             }
             .onChange(of: scenePhase) { phase in
                 guard phase == .active, !showOnboarding else { return }
@@ -163,7 +116,13 @@ struct ThreeOneOSSixApp: App {
                 // importer; everything else stays on the patch-package path.
                 if url.isFileURL,
                    url.pathExtension.lowercased() == MigrationConfigBackupService.packageExtension {
-                    importConfigPackage(at: url)
+                    do {
+                        _ = try MigrationConfigBackupService.importPackage(at: url)
+                        migrationTaskCenter.refreshStoredSets()
+                        log("migration: config package imported via URL")
+                    } catch {
+                        log("migration: config package import failed — \(error)")
+                    }
                     return
                 }
                 patchDraftCoordinator.presentImport(url)

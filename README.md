@@ -1,3 +1,9 @@
+> **NVD 1506 — bản cá nhân hoá (tiếng Việt) từ 3106 của QuinnTang74.**
+> Gốc: https://github.com/QuinnTang74/3106 (GPL-3.0). Bản này đổi tên app, bundle ID
+> (com.NVD.1506), App Group (group.com.NVD.1506), icon lợn + màu mận, chỉ giữ tiếng
+> Việt, và thêm đuôi patch .nvd (vẫn mở được .3105/.3106). Ghi công tác giả gốc giữ
+> trong LICENSE và NOTICE.md.
+
 <p align="center">
   <img src="docs/images/app-icon.png" width="120" alt="3106">
 </p>
@@ -18,8 +24,8 @@
 
 | 项目 | 内容 |
 | --- | --- |
-| 当前版本 | **3.2.5**（正式版 · 同版本重发版 rebuild） |
-| 当前发布 | **v3.2.5**（build 24，2026-11-14 重发：新增应用通知音替换；字段 plist 导入改补丁式合并、备份元数据校验、显式编辑优先于预设、关闭开关不再删键、issue #3 静态回归护栏；旧包备份于 `dist/backups/`，SHA256 以 `dist/SHA256SUMS.txt` 为准） |
+| 当前版本 | **3.2.5**（正式版） |
+| 当前发布 | **v3.2.5**（build 24，修复：tendies 导入重载决议缺陷 + 清理器软链拒绝 + 日志构建戳） |
 | 支持系统 | iOS 17.0–18.7.1 · 26.0–26.6.1 · 26.7–26.7.2 · 27.0–27.3 beta 1（已验证） |
 | 访问后端 | kernel / `bad_query` / `worse_query`（按系统版本自动选择） |
 | 界面语言 | 简体中文 · English · Tiếng Việt |
@@ -35,7 +41,6 @@
 | CacheExtra 字段编辑器 | 8 种类型（含 Array/Dictionary XML 片段）、搜索/增删改、plist 导入导出、类型保真 |
 | 区域与 Siri AI | 区域三元组 + 监管型号（已核实机型表）、原生 Siri AI / 实验模式、防重启反弹 |
 | 任意文件替换 | 选应用→逐级浏览容器目录→选文件→可选备份→替换；替换记录持久化、一键恢复备份、预设保存一键选用；受保护系统路径护栏 |
-| 通知音替换 | 按应用维护通知音路径表（手动输入），选自定义音频（aiff/aif/caf/m4a/wav ≤20MB）替换；自动备份 + 替换记录一键恢复；`.data` 选择器兜底，侧载包可选音频 |
 | 监管模式 | Supervised Mode 开关（ConfigurationProfiles，MDM 警告 + 风险确认） |
 | 应用存档备份 | Documents + Library/Preferences 打包 `.3106save`，重装后按 bundleID 重匹配容器还原 |
 | 备份 tab（一级页） | 自动备份说明、快照总览、全量备份 `.3106fullbackup`（含清单、一键恢复）、存档预览、操作时间线 |
@@ -60,7 +65,6 @@
 
 | 版本 | 主要内容 |
 | --- | --- |
-| **3.2.5 rebuild** | 同版本号重发：新增应用通知音替换；字段 plist 导入改为补丁式合并（不丢设备键，GestaltX #138/#131/#132 语义）、备份元数据校验（#134）、`.3106cfg` 导入错误可见 + App Group 收件箱回退（#133）、显式编辑优先于预设（#137）、关闭开关不再删键、issue #3 静态回归护栏；SHA256 以 `dist/SHA256SUMS.txt` 为准 |
 | **3.2.4** | 功能补全：WCMigrate 迁移引擎（双应用文件夹替换/合并/转换 + 检查点续传 + 配置备份包）、GestaltX 外观套件（锁屏文字/启动图/灵动岛布局/端侧 Siri 保护）、更新检查加固（前台切换检查 + 失败原因显示） |
 | **3.2.5** | 修复：`.tendies` 导入重载决议缺陷（issue #3，descriptors 全跳过的真根因）、清理器 `/var` 软链拒绝（56 应用全部 symlinkEscapesContainer）、日志构建戳与 CI 产物哨兵校验 |
 | **3.2.3** | 正式版：修复 `.tendies` 真机导入全部失败 noDescriptors（issue #2：路径包含检查不再依赖软链解析，/var 与 /private/var 任意拼写组合均接受） |
@@ -158,7 +162,7 @@
 | --- | --- |
 | 无签名构建 | `xcodebuild -project ThreeOneOSSix.xcodeproj -scheme 3106 -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build` |
 | 策略测试 | `bash Tests/run_policy_tests.sh` |
-| 产物目录 | `dist/`，重发版文件名 `3106-3.2.5-unsigned.ipa`，校验值以 `dist/SHA256SUMS.txt` 为准 |
+| 产物目录 | `dist/`，本次文件名 `3106-3.2.3-unsigned.ipa` |
 
 ## 下载
 
@@ -168,7 +172,7 @@
 
 发布资产为未签名 IPA，需要按上面的签名方式自行签名后安装。
 
-当前版本：`3106-3.2.5-unsigned.ipa` / build 24。本轮为同版本号重发版（rebuild），请以 `dist/SHA256SUMS.txt` 中的最新 SHA256 区分新旧产物，旧包备份在 `dist/backups/`。
+当前版本：`3106-3.2.3-unsigned.ipa`（SHA256 `4f47344764422731bd33b77f3aad8d39d25f67ef8a564bee9e2c5ced0d4c6fae`）。
 
 ## 开源协议与商用说明
 

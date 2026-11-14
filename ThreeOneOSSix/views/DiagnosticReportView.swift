@@ -11,7 +11,7 @@ struct DiagnosticReportView: View {
 
     private var composed: String {
         var lines: [String] = []
-        lines.append("3106 Diagnostics")
+        lines.append("NVD 1506 Diagnostics")
         lines.append("iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) — \(AppInfo.machineName)")
         lines.append("Generated: \(Date())")
         lines.append("Backend: \(SandboxAccess.backend.displayName)")

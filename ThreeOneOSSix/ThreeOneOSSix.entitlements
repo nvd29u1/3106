@@ -11,7 +11,7 @@
     -->
     <key>com.apple.security.application-groups</key>
     <array>
-        <string>group.com.qingtang.3106</string>
+        <string>group.com.NVD.1506</string>
     </array>
 </dict>
 </plist>

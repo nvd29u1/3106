@@ -122,7 +122,7 @@ struct DisplayAttributionSheet: View {
                     HStack(spacing: 14) {
                         AppLogo(size: 44)
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("3106")
+                            Text("NVD 1506")
                                 .font(.headline)
                             Text(language.text("attribution.subtitle"))
                                 .font(.subheadline)

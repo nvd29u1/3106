@@ -263,11 +263,7 @@ enum GestaltPresetEngine {
                 throw GestaltPresetError.missingCacheExtra
             }
 
-            let keys = GestaltEditPolicy.keysToApply(
-                presetKeys: preset.keys,
-                explicitEdits: GestaltExplicitEdits.keys()
-            )
-            for key in keys {
+            for key in preset.keys {
                 // Anti-bounce guard: the key must already exist on this device.
                 guard cacheExtra[key] != nil else {
                     throw GestaltPresetError.keyNotInOriginalCache(key: key)
@@ -323,10 +319,6 @@ enum GestaltPresetEngine {
                 }
             }
 
-            guard !keys.isEmpty else {
-                log("gestalt: preset \(preset.id) skipped — all keys explicitly edited")
-                return
-            }
             root["CacheExtra"] = cacheExtra
             try GestaltPlistIO.writeRoot(root, reason: "preset:\(preset.id)")
         }

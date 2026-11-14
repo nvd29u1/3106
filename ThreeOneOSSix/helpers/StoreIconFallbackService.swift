@@ -22,7 +22,7 @@ enum StoreIconFallbackService {
     private static var cacheURL: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-        return base.appendingPathComponent("3106/store-icon-cache.plist")
+        return base.appendingPathComponent("NVD 1506/store-icon-cache.plist")
     }
 
     /// actor: serializes lookups; in-memory image cache for the session.

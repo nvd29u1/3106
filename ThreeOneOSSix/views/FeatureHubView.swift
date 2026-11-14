@@ -184,16 +184,6 @@ struct FeatureHubView: View {
                     .buttonStyle(.plain)
 
                     NavigationLink {
-                        NotificationSoundView()
-                    } label: {
-                        card(
-                            "home.card.sounds",
-                            detail: "home.card.sounds_detail",
-                            icon: "speaker.wave.2.fill"
-                        )
-                    }
-
-                    NavigationLink {
                         BackupCenterView()
                     } label: {
                         card(

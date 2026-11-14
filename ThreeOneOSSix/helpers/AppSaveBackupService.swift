@@ -46,7 +46,7 @@ enum AppSaveBackupService {
     }
 
     static let protectedBundleIDs: Set<String> = [
-        "com.qingtang.3106",
+        "com.NVD.1506",
         "com.apple.springboard",
         "com.apple.Preferences",
         "com.apple.mobilephone",
@@ -55,7 +55,7 @@ enum AppSaveBackupService {
 
     static var backupsDirectory: URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return docs.appendingPathComponent("3106/SaveBackups", isDirectory: true)
+        return docs.appendingPathComponent("NVD 1506/SaveBackups", isDirectory: true)
     }
 
     // MARK: - Scanning
@@ -168,7 +168,7 @@ enum AppSaveBackupService {
         return urls
             .filter { $0.pathExtension.lowercased() == "3106save" }
             .compactMap { url -> BackupEntry? in
-                guard let manifest = readValidatedManifest(from: url) else { return nil }
+                guard let manifest = readManifestFast(from: url) else { return nil }
                 let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
                 return BackupEntry(
                     id: UUID(),
@@ -180,31 +180,16 @@ enum AppSaveBackupService {
             .sorted { $0.manifest.createdAt > $1.manifest.createdAt }
     }
 
-    /// GestaltX #134: validate the sidecar identity before trusting it. A
-    /// corrupt sidecar is rejected instead of silently falling back to a
-    /// full extract; legacy archives without any sidecar remain supported.
-    private static func readValidatedManifest(from archiveURL: URL) -> SaveBackupManifest? {
-        let archiveName = archiveURL.lastPathComponent
+    /// Read the manifest from the sidecar file when present; fall back to a
+    /// full archive extract only for legacy archives without a sidecar.
+    private static func readManifestFast(from archiveURL: URL) -> SaveBackupManifest? {
         let sidecarURL = archiveURL.deletingLastPathComponent()
-            .appendingPathComponent(BackupMetadataPolicy.sidecarName(forArchive: archiveName))
-        let hasSidecar = FileManager.default.fileExists(atPath: sidecarURL.path)
-        guard !hasSidecar else {
-            guard case .valid = BackupMetadataPolicy.validateSidecarName(
-                archiveName: archiveName, sidecarName: sidecarURL.lastPathComponent
-            ),
-            let data = try? Data(contentsOf: sidecarURL),
-            let manifest = try? PropertyListDecoder().decode(SaveBackupManifest.self, from: data),
-            case .valid = BackupMetadataPolicy.validateManifest(
-                bundleID: manifest.bundleID, createdAt: manifest.createdAt
-            ) else { return nil }
+            .appendingPathComponent(archiveURL.deletingPathExtension().lastPathComponent + ".manifest.plist")
+        if let data = try? Data(contentsOf: sidecarURL),
+           let manifest = try? PropertyListDecoder().decode(SaveBackupManifest.self, from: data) {
             return manifest
         }
-        guard let manifest = readManifest(from: archiveURL),
-              case .valid = BackupMetadataPolicy.validateManifest(
-                bundleID: manifest.bundleID, createdAt: manifest.createdAt
-              ) else { return nil }
-        log("savebackup: legacy archive without sidecar — \(archiveName)")
-        return manifest
+        return readManifest(from: archiveURL)
     }
 
     static func delete(_ entry: BackupEntry) {

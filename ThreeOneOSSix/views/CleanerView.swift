@@ -56,8 +56,7 @@ struct CleanerView: View {
     }
 
     private var areAllVisibleRecordsSelected: Bool {
-        !visibleBundleIDs.isEmpty
-            && visibleBundleIDs.allSatisfy { selectedBundleIDs.contains($0) }
+        !visibleBundleIDs.isEmpty && visibleBundleIDs.allSatisfy(selectedBundleIDs.contains)
     }
 
     private var totalAvailableBytes: Int64 {

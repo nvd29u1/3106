@@ -79,7 +79,7 @@ enum RepositoryPackageKind: String, Codable, Hashable {
     case patch
     case wallpaper
     /// Upstream release IPA (AltStore-format sources): downloaded to
-    /// Documents/3106/IPAs and handed to the share sheet for the user's own
+    /// Documents/NVD 1506/IPAs and handed to the share sheet for the user's own
     /// signing tool — no in-app install is attempted.
     case ipa
 }

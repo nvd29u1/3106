@@ -9,7 +9,7 @@ struct LogView: View {
 
     private var shareText: String {
         var lines: [String] = []
-        lines.append("3106 Log")
+        lines.append("NVD 1506 Log")
         lines.append("iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) — \(AppInfo.machineName)")
         lines.append("Generated: \(Date())")
         lines.append("")

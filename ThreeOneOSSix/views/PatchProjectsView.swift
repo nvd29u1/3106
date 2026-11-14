@@ -3,9 +3,10 @@ import UIKit
 import UniformTypeIdentifiers
 
 private enum PatchPackagePickerPolicy {
-    // Export uses the new .3106 extension; .3105 stays importable so existing
+    // Export uses the new .nvd extension; .3106/.3105 stay importable so existing
     // patch repositories keep working.
-    static let packageType = UTType(filenameExtension: "3106")
+    static let packageType = UTType(filenameExtension: "nvd")
+        ?? UTType(filenameExtension: "3106")
         ?? UTType(filenameExtension: "3105")
         ?? .data
     static let allowedContentTypes: [UTType] = [packageType, .data]

@@ -76,7 +76,7 @@ final class ScanCoordinator: ObservableObject {
 
     private func beginBackgroundTask() {
         endBackgroundTask()
-        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "3106 scan") { [weak self] in
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "NVD 1506 scan") { [weak self] in
             DispatchQueue.main.async {
                 self?.finish()
             }

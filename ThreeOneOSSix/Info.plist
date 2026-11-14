@@ -3,44 +3,44 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>vi</string>
 	<key>CFBundleDisplayName</key>
-	<string>3106</string>
+	<string>NVD 1506</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleTypeName</key>
-			<string>3106 Patch Package</string>
+			<string>NVD 1506 Patch Package</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.qingtang.3106.patch-package</string>
+				<string>com.NVD.1506.patch-package</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeName</key>
-			<string>3106 Config Package</string>
+			<string>NVD 1506 Config Package</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.qingtang.3106.config-package</string>
+				<string>com.NVD.1506.config-package</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.qingtang.3106</string>
+	<string>com.NVD.1506</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>3106</string>
+	<string>NVD 1506</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -49,7 +49,7 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.qingtang.3106.patch-import</string>
+			<string>com.NVD.1506.patch-import</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>threeoneossix</string>
@@ -66,9 +66,9 @@
 	<key>MinimumOSVersion</key>
 	<string>16.0</string>
 	<key>NSDocumentsFolderUsageDescription</key>
-	<string>3106 needs access to documents.</string>
+	<string>NVD 1506 needs access to documents.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>3106 needs access to photos for wallpaper customization.</string>
+	<string>NVD 1506 needs access to photos for wallpaper customization.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -97,18 +97,19 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>3106 Patch Package</string>
+			<string>NVD 1506 Patch Package</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.qingtang.3106.patch-package</string>
+			<string>com.NVD.1506.patch-package</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
+					<string>nvd</string>
 					<string>3106</string>
 					<string>3105</string>
 				</array>
 				<key>public.mime-type</key>
-				<string>application/x-3106-patch</string>
+				<string>application/x-nvd-patch</string>
 			</dict>
 		</dict>
 		<dict>
@@ -117,9 +118,9 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>3106 Config Package</string>
+			<string>NVD 1506 Config Package</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.qingtang.3106.config-package</string>
+			<string>com.NVD.1506.config-package</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>

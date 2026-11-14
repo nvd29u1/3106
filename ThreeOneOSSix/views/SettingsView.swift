@@ -4,7 +4,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appLanguage) private var language
     @EnvironmentObject private var appState: AppState
-    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
+    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.vietnamese.rawValue
     // Mirrors SoundEffects.isEnabled so the effect player reads one source of
     // truth (UserDefaults) while the toggle gets @AppStorage semantics.
     @AppStorage("sound.effects.enabled") private var soundEffectsEnabled = true
@@ -56,7 +56,7 @@ struct SettingsView: View {
                         AppLogo()
 
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("3106").font(.headline)
+                            Text("NVD 1506").font(.headline)
                             Text(language.text("common.version", appVersion))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
@@ -216,12 +216,12 @@ struct SettingsView: View {
                 }
 
                 Section(language.text("settings.github")) {
-                    if let destination = URL(string: "https://github.com/QuinnTang74/3106.git") {
+                    if let destination = URL(string: "https://github.com/nvd29u1/3106.git") {
                         Link(destination: destination) {
                             HStack(spacing: 12) {
                                 Label("GitHub", systemImage: "link")
                                 Spacer()
-                                Text("QuinnTang74/3106")
+                                Text("nvd29u1/3106")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -243,7 +243,8 @@ struct SettingsView: View {
     }
 
     private var appVersion: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        Bundle.main.object(forInfoDictionaryKey: "AppReleaseDisplayVersion") as? String
+            ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
             ?? "1.0"
     }
 

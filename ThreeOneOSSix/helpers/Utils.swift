@@ -17,7 +17,7 @@ class AppLog: ObservableObject {
 private var consoleStderrFD: Int32 = -1
 
 func log(_ msg: String) {
-    let line = "[3106/\(buildStamp)] \(msg)"
+    let line = "[NVD 1506/\(buildStamp)] \(msg)"
     AppLog.shared.append(line)
     let fd = consoleStderrFD
     if fd >= 0 {
@@ -29,7 +29,7 @@ func log(_ msg: String) {
     }
 }
 
-/// Build stamp for every log line ("[3106/3.2.5-24] ..."), so a device log
+/// Build stamp for every log line ("[NVD 1506/3.2.5-24] ..."), so a device log
 /// alone identifies which binary produced it (issue #3: testers reported
 /// logs from builds that no longer matched any released artifact).
 var buildStamp: String = {

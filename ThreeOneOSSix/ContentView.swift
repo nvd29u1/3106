@@ -131,7 +131,7 @@ struct ContentView: View {
                     )
                 }
             }
-            .navigationTitle("3106")
+            .navigationTitle("NVD 1506")
             .navigationSplitViewColumnWidth(min: 210, ideal: 240, max: 300)
         } detail: {
             sectionContent(selectedVisibleSection)

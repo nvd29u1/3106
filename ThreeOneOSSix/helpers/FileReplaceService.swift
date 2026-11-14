@@ -97,7 +97,7 @@ enum FileReplaceService {
 
     static var presetsFileURL: URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return docs.appendingPathComponent("3106/FileReplacePresets.plist", isDirectory: false)
+        return docs.appendingPathComponent("NVD 1506/FileReplacePresets.plist", isDirectory: false)
     }
 
     static func loadPresets() -> [ReplacePreset] {
@@ -167,7 +167,7 @@ enum FileReplaceService {
 
     static var logFileURL: URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return docs.appendingPathComponent("3106/FileReplaceLog.plist", isDirectory: false)
+        return docs.appendingPathComponent("NVD 1506/FileReplaceLog.plist", isDirectory: false)
     }
 
     static func loadLog() -> [ReplaceRecord] {
@@ -222,7 +222,7 @@ enum FileReplaceService {
 
     static var backupDirectory: URL {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return docs.appendingPathComponent("3106/FileReplaceBackups", isDirectory: true)
+        return docs.appendingPathComponent("NVD 1506/FileReplaceBackups", isDirectory: true)
     }
 
     /// Copy the current target into the backup dir under a timestamped name.

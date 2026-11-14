@@ -15,7 +15,7 @@ enum PatchImportSource: Equatable {
 enum PatchImportRoute {
     static let urlScheme = "threeoneossix"
     static let legacyURLScheme = "threeoneosfive"
-    static let packageExtensions: Set<String> = ["3106", "3105"]
+    static let packageExtensions: Set<String> = ["nvd", "3106", "3105"]
 
     static func resolve(_ incomingURL: URL) -> PatchImportSource {
         if incomingURL.isFileURL {

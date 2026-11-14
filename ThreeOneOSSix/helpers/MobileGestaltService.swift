@@ -221,9 +221,7 @@ enum MobileGestaltService {
         if enabled {
             dictionary[key] = 1
         } else {
-            // Keep the key and its CF type. Deleting it violates the
-            // anti-bounce rule in docs/RISKS.md (iOS 27 rebuilds the cache).
-            dictionary[key] = GestaltEditPolicy.disabledValue(for: dictionary[key])
+            dictionary.removeValue(forKey: key)
         }
     }
 }

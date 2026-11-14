@@ -284,7 +284,7 @@ enum MigrationConfigBackupService {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         return base
-            .appendingPathComponent("3106", isDirectory: true)
+            .appendingPathComponent("NVD 1506", isDirectory: true)
             .appendingPathComponent("Migration", isDirectory: true)
             .appendingPathComponent("Configs", isDirectory: true)
     }

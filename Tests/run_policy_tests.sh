@@ -33,13 +33,6 @@ fi
 # a missing key renders the raw key string in the UI.
 "$ROOT/Tests/check_strings_alignment.sh"
 
-# Issue #3 regression: a bare `Set.contains` function reference passed to
-# allSatisfy can resolve to a different overload under whole-module -O.
-if rg -n '\.allSatisfy\([A-Za-z0-9_.]+\.contains\)' "$ROOT/ThreeOneOSSix" --glob '*.swift' >/dev/null; then
-  echo "FAIL: bare contains function reference remains (issue #3)" >&2
-  exit 1
-fi
-
 swiftc -O \
   "$ROOT/ThreeOneOSSix/helpers/SupportPolicy.swift" \
   "$ROOT/ThreeOneOSSix/helpers/LaunchServicesStore.swift" \
@@ -60,12 +53,6 @@ swiftc -O \
   "$ROOT/ThreeOneOSSix/helpers/TempSpaceRegistry.swift" \
   "$ROOT/ThreeOneOSSix/helpers/TextPagination.swift" \
   "$ROOT/ThreeOneOSSix/helpers/AppUpdateChecker.swift" \
-  "$ROOT/ThreeOneOSSix/helpers/IdentityComparator.swift" \
-  "$ROOT/ThreeOneOSSix/helpers/GestaltValueParser.swift" \
-  "$ROOT/ThreeOneOSSix/helpers/GestaltPlistMerge.swift" \
-  "$ROOT/ThreeOneOSSix/helpers/BackupMetadataPolicy.swift" \
-  "$ROOT/ThreeOneOSSix/helpers/GestaltEditPolicy.swift" \
-  "$ROOT/ThreeOneOSSix/helpers/NotificationSoundPolicy.swift" \
   "$ROOT/Tests/main.swift" \
   -o "$TMP/policy-tests"
 

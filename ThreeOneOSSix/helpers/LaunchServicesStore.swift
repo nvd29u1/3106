@@ -593,7 +593,7 @@ enum ContainerCatalogCache {
             create: true
         )) ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         return base
-            .appendingPathComponent("3106", isDirectory: true)
+            .appendingPathComponent("NVD 1506", isDirectory: true)
             .appendingPathComponent("container-catalog.json")
     }
 
