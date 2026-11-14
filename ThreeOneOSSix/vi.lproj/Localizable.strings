@@ -34,6 +34,7 @@
 "onboarding.welcome_title" = "Chào mừng đến với NVD 1506";
 "onboarding.welcome_message" = "NVD 1506";
 "onboarding.welcome_badge" = "Định danh chính thức NVD 1506";
+"onboarding.current_version" = "Phiên bản hiện tại";
 "onboarding.versions_title" = "Phiên bản iOS được hỗ trợ";
 "onboarding.versions_subtitle" = "NVD 1506 đã được xác minh trên các khoảng bên dưới. Build ngoài phạm vi sẽ bị chặn.";
 "onboarding.versions_footer" = "Thiết bị này: iOS %@ (%@)";

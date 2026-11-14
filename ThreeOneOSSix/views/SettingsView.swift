@@ -4,7 +4,6 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appLanguage) private var language
     @EnvironmentObject private var appState: AppState
-    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.vietnamese.rawValue
     // Mirrors SoundEffects.isEnabled so the effect player reads one source of
     // truth (UserDefaults) while the toggle gets @AppStorage semantics.
     @AppStorage("sound.effects.enabled") private var soundEffectsEnabled = true
@@ -63,16 +62,6 @@ struct SettingsView: View {
                         }
                     }
                     .padding(.vertical, 4)
-                }
-
-                Section(language.text("settings.language")) {
-                    Picker(language.text("settings.language"), selection: $languageCode) {
-                        ForEach(AppLanguage.allCases) { option in
-                            Text(option.displayName).tag(option.rawValue)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
                 }
 
                 Section {
