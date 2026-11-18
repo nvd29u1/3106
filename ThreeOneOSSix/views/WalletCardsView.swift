@@ -89,7 +89,7 @@ struct CompactLogView: View {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .stroke(Color.secondary.opacity(0.18), lineWidth: 0.5)
                 )
-                .onChange(of: lines.count) { _, _ in
+                .onChange(of: lines.count) { _ in
                     if !lines.isEmpty {
                         proxy.scrollTo(lines.count - 1, anchor: .bottom)
                     }

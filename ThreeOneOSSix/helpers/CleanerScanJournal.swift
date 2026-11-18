@@ -67,7 +67,8 @@ enum CleanerScanJournal {
             )
             var values = URLResourceValues()
             values.isExcludedFromBackup = true
-            try? url.setResourceValues(values)
+            var mutableURL = url
+            try? mutableURL.setResourceValues(values)
             directoryReady = true
             return true
         } catch {
