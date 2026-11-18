@@ -2,7 +2,7 @@ import Foundation
 
 /// Persistence for migration receipts and the orphan-temp journal.
 ///
-/// Layout: Application Support/NVD 1506/Migration/<planID>/receipt.json plus
+/// Layout: Application Support/3106/Migration/<planID>/receipt.json plus
 /// journal.json (pending partial-temp names). Receipts are throttled (every
 /// 8 files, or 2s, or 64MB) except before destructive steps — exchange and
 /// each mapping's first file force a flush. Files live in the app's own

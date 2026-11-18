@@ -39,6 +39,36 @@ func expectFalse(_ condition: Bool, _ message: String) {
     expect(!condition, message)
 }
 
+/// Asserts a throwing call fails with exactly the expected policy error.
+func expectThrows(
+    _ message: String,
+    expected: NotificationSoundPolicy.ValidationError,
+    body: () throws -> Void
+) {
+    checks += 1
+    do {
+        try body()
+        failures += 1
+        fputs("FAIL: \(message) — no error thrown\n", stderr)
+    } catch let error as NotificationSoundPolicy.ValidationError where error == expected {
+        // pass
+    } catch {
+        failures += 1
+        fputs("FAIL: \(message) — unexpected error \(error)\n", stderr)
+    }
+}
+
+/// Asserts a throwing call succeeds (no error, no value to compare).
+func expectNoThrow(_ message: String, body: () throws -> Void) {
+    checks += 1
+    do {
+        try body()
+    } catch {
+        failures += 1
+        fputs("FAIL: \(message) — threw \(error)\n", stderr)
+    }
+}
+
 // iOS 17 kernel range
 expect(ExploitSupportPolicy.supportsKernelExploit(major: 17, minor: 0, patch: 0), "17.0 kernel")
 expect(ExploitSupportPolicy.supportsKernelExploit(major: 17, minor: 7, patch: 9), "17.7.x kernel")
@@ -1010,6 +1040,511 @@ do {
         !WallpaperLayoutScanner.validExtensionIdentifier("no-dot"),
         "identifier without a dot rejected"
     )
+}
+
+// MARK: - GestaltX v1.1.1 #131/#132/#138 field-import integrity
+
+do {
+    let current: [String: Any] = [
+        "CacheUUID": "ABCD-1234",
+        "CacheVersion": NSNumber(value: 7),
+        "CacheData": Data([1, 2, 3]),
+        "PrivateLayout": "device-specific",
+        "CacheExtra": [
+            "keep": "original",
+            "edit": NSNumber(value: false),
+            "camera": NSNumber(value: 1.5),
+        ],
+    ]
+    let imported: [String: Any] = [
+        "CacheUUID": "abcd-1234",
+        "CacheVersion": NSNumber(value: 99),
+        "CacheData": Data([9, 9, 9]),
+        "PrivateLayout": "foreign",
+        "CacheExtra": [
+            "edit": NSNumber(value: true),
+            "unknown": "must-not-be-added",
+        ],
+    ]
+    let result = try GestaltPlistMerge.mergingFieldImport(
+        current: current, imported: imported
+    )
+    let extra = result.root["CacheExtra"] as? [String: Any] ?? [:]
+    expect((result.root["CacheVersion"] as? NSNumber)?.intValue == 7,
+           "field import preserves current CacheVersion")
+    expect((result.root["CacheData"] as? Data) == Data([1, 2, 3]),
+           "field import preserves device-specific CacheData")
+    expect((result.root["PrivateLayout"] as? String) == "device-specific",
+           "field import preserves private root keys")
+    expect((extra["keep"] as? String) == "original",
+           "field import does not remove current CacheExtra keys")
+    expect((extra["edit"] as? NSNumber)?.boolValue == true,
+           "field import overwrites explicit CacheExtra keys")
+    expect(extra["unknown"] == nil,
+           "field import skips keys absent from the device cache")
+    expect(result.overwritten == ["edit"], "field import reports overwritten keys")
+    expect(result.skipped == ["unknown"], "field import reports skipped keys")
+    expect(CFGetTypeID(extra["edit"] as! NSNumber) == CFBooleanGetTypeID(),
+           "field import keeps Boolean CF type")
+    expect((extra["camera"] as? NSNumber)?.doubleValue == 1.5,
+           "field import keeps untouched Real value")
+
+    let mismatched = try? GestaltPlistMerge.mergingFieldImport(
+        current: current,
+        imported: ["CacheUUID": "DIFFERENT", "CacheExtra": ["edit": "x"]]
+    )
+    expect(mismatched == nil, "different CacheUUID rejects field import")
+    let missing = try? GestaltPlistMerge.mergingFieldImport(
+        current: ["CacheExtra": ["a": "b"]], imported: ["Other": "value"]
+    )
+    expect(missing == nil, "missing CacheExtra rejects field import")
+
+    expect(IdentityComparator.caseInsensitiveEqual(" ABCD-1234 ", "abcd-1234"),
+           "cache UUID comparison ignores case and surrounding whitespace")
+    expectFalse(IdentityComparator.caseInsensitiveEqual("ABCD-1234", "ABCD-5678"),
+                "cache UUID comparison still rejects different UUIDs")
+
+    expect(GestaltValueParser.parseDate("2026-11-14T08:30:00Z") != nil,
+           "strict date parser accepts ISO8601")
+    expect(GestaltValueParser.parseDate("2026-11-14T08:30:00.123Z") != nil,
+           "strict date parser accepts fractional seconds")
+    expect(GestaltValueParser.parseDate("2026-11-14T08:30:00Zjunk") == nil,
+           "strict date parser rejects trailing text (#132)")
+    expect(GestaltValueParser.parseData("AQID") == Data([1, 2, 3]),
+           "strict data parser accepts base64")
+    expect(GestaltValueParser.parseData("AQIDjunk!") == nil,
+           "strict data parser rejects malformed base64")
+    expect(GestaltValueParser.parseData("   ") == nil,
+           "strict data parser rejects empty input")
+}
+
+// MARK: - GestaltX v1.1.1 #134 backup metadata validation
+
+do {
+    let archive = "com.example.app-123.3106save"
+    let sidecar = BackupMetadataPolicy.sidecarName(forArchive: archive)
+    expect(sidecar == "com.example.app-123.manifest.plist",
+           "backup sidecar name is derived from the archive name")
+    expect(BackupMetadataPolicy.validateSidecarName(
+        archiveName: archive, sidecarName: sidecar
+    ) == .valid, "valid backup sidecar name accepted")
+    expect(BackupMetadataPolicy.validateSidecarName(
+        archiveName: archive, sidecarName: "other.manifest.plist"
+    ) == .rejected(reason: .invalidSidecarName),
+           "mismatched backup sidecar name rejected")
+    expect(BackupMetadataPolicy.validateSidecarName(
+        archiveName: "com.example.app-123.zip", sidecarName: sidecar
+    ) == .rejected(reason: .invalidSidecarName),
+           "non-3106save archive rejected")
+
+    let now = Date()
+    expect(BackupMetadataPolicy.validateManifest(
+        bundleID: "com.example.app", createdAt: now.addingTimeInterval(-60), now: now
+    ) == .valid, "valid backup manifest accepted")
+    expect(BackupMetadataPolicy.validateManifest(
+        bundleID: "", createdAt: now, now: now
+    ) == .rejected(reason: .emptyBundleID), "empty bundle ID rejected")
+    expect(BackupMetadataPolicy.validateManifest(
+        bundleID: "example", createdAt: now, now: now
+    ) == .rejected(reason: .invalidBundleID), "single-component bundle ID rejected")
+    expect(BackupMetadataPolicy.validateManifest(
+        bundleID: "com.example/app", createdAt: now, now: now
+    ) == .rejected(reason: .invalidBundleID), "bundle ID with slash rejected")
+    expect(BackupMetadataPolicy.validateManifest(
+        bundleID: "com.example.app", createdAt: now.addingTimeInterval(3600), now: now
+    ) == .rejected(reason: .futureTimestamp), "future createdAt rejected")
+
+    expect(BackupMetadataPolicy.validateArchivePath("Library/Preferences/a.plist") == .valid,
+           "safe archive path accepted")
+    expect(BackupMetadataPolicy.validateArchivePath("../escape.plist") ==
+           .rejected(reason: .unsafePath), "parent traversal rejected")
+    expect(BackupMetadataPolicy.validateArchivePath("/absolute.plist") ==
+           .rejected(reason: .unsafePath), "absolute archive path rejected")
+    expect(BackupMetadataPolicy.validateArchivePath("Library\\escape.plist") ==
+           .rejected(reason: .unsafePath), "backslash archive path rejected")
+    expect(BackupMetadataPolicy.validateArchivePath("Library/./a.plist") ==
+           .rejected(reason: .unsafePath), "dot component rejected")
+    expect(BackupMetadataPolicy.validateManifest(
+        bundleID: "com.example.app",
+        createdAt: now.addingTimeInterval(BackupMetadataPolicy.maxFutureTolerance - 1),
+        now: now
+    ) == .valid, "small clock drift within tolerance accepted")
+    expect(BackupMetadataPolicy.validateManifest(
+        bundleID: "com.example.app",
+        createdAt: now.addingTimeInterval(BackupMetadataPolicy.maxFutureTolerance + 1),
+        now: now
+    ) == .rejected(reason: .futureTimestamp), "clock drift beyond tolerance rejected")
+}
+
+// MARK: - GestaltX v1.1.1 #136/#137/#139 edit precedence and exact plist types
+
+do {
+    let snapshot = [
+        GestaltEditPolicy.Field(key: "camera", preview: "1.5"),
+        GestaltEditPolicy.Field(key: "region", preview: "US"),
+    ]
+    expect(GestaltEditPolicy.filtered(snapshot, query: "1.5").map(\.key) == ["camera"],
+           "field search matches snapshot preview once")
+    expect(GestaltEditPolicy.filtered(snapshot, query: " ").count == 2,
+           "blank field search returns the whole snapshot")
+    expect(GestaltEditPolicy.filtered(snapshot, query: "REGION").map(\.key) == ["region"],
+           "field search is case-insensitive")
+
+    expect(GestaltEditPolicy.keysToApply(
+        presetKeys: ["a", "b", "c"], explicitEdits: ["b"]
+    ) == ["a", "c"], "explicit field edits win over layout presets")
+    expect(GestaltEditPolicy.keysToApply(
+        presetKeys: ["a"], explicitEdits: ["a"]
+    ).isEmpty, "fully explicit preset has no keys to write")
+
+    expect(GestaltEditPolicy.exactlyEqual(NSNumber(value: true), NSNumber(value: true)),
+           "Boolean exact comparison accepts equal values")
+    expectFalse(GestaltEditPolicy.exactlyEqual(NSNumber(value: true), NSNumber(value: 1)),
+                "Boolean never equals Integer 1")
+    expectFalse(GestaltEditPolicy.exactlyEqual(NSNumber(value: 1), NSNumber(value: 1.0)),
+                "Integer never equals Real 1.0")
+    expect(GestaltEditPolicy.exactlyEqual(
+        ["a": NSNumber(value: true), "b": Data([1, 2])] as [String: Any],
+        ["b": Data([1, 2]), "a": NSNumber(value: true)] as [String: Any]
+    ), "nested dictionary exact comparison is order-independent")
+    expectFalse(GestaltEditPolicy.exactlyEqual(
+        ["a": NSNumber(value: true)] as [String: Any],
+        ["a": NSNumber(value: 1)] as [String: Any]
+    ), "nested dictionary compares CF types")
+
+    let disabledBoolean = GestaltEditPolicy.disabledValue(for: NSNumber(value: true))
+    expect(CFGetTypeID(disabledBoolean as! NSNumber) == CFBooleanGetTypeID(),
+           "disabled Boolean keeps Boolean CF type")
+    let disabledInteger = GestaltEditPolicy.disabledValue(for: NSNumber(value: 7))
+    expect(CFGetTypeID(disabledInteger as! NSNumber) != CFBooleanGetTypeID(),
+           "disabled Integer keeps numeric CF type")
+    expect((disabledInteger as? NSNumber)?.intValue == 0,
+           "disabled Integer writes zero instead of deleting the key")
+    let disabledReal = GestaltEditPolicy.disabledValue(for: NSNumber(value: 2.5))
+    expect(CFNumberIsFloatType(unsafeBitCast(disabledReal as! NSNumber, to: CFNumber.self)),
+           "disabled Real keeps Real CF type")
+}
+
+// MARK: - GestaltX App Audio Library parity: notification sound policy
+
+do {
+    expect(NotificationSoundPolicy.acceptsSourceExtension("CAF"),
+           "notification sound accepts caf case-insensitively")
+    expect(NotificationSoundPolicy.acceptsSourceExtension("m4a"),
+           "notification sound accepts m4a")
+    expectFalse(NotificationSoundPolicy.acceptsSourceExtension("tone.mp3"),
+                "notification sound rejects mp3")
+    expectFalse(NotificationSoundPolicy.acceptsSourceExtension("tone"),
+                "notification sound rejects missing extension")
+
+    expectThrows("notification sound rejects empty source", expected: .emptySource) {
+        try NotificationSoundPolicy.validateSourceSize(0)
+    }
+    expectThrows("notification sound rejects oversized source", expected: .tooLarge) {
+        try NotificationSoundPolicy.validateSourceSize(
+            NotificationSoundPolicy.maximumBytes + 1
+        )
+    }
+    expectNoThrow("notification sound accepts source at the size limit") {
+        try NotificationSoundPolicy.validateSourceSize(
+            NotificationSoundPolicy.maximumBytes
+        )
+    }
+
+    let root = NSTemporaryDirectory() + "3106-ns-verify-\(UUID().uuidString)"
+    let container = root + "/var/containers/app-data"
+    try FileManager.default.createDirectory(
+        atPath: container + "/Library/Sounds", withIntermediateDirectories: true
+    )
+    let sound = container + "/Library/Sounds/local.caf"
+    try Data([1, 2, 3]).write(to: URL(fileURLWithPath: sound))
+
+    expectNoThrow("notification sound accepts an in-container target") {
+        try NotificationSoundPolicy.validateTargetPath(
+            sound, containerRoot: container
+        )
+    }
+    expectThrows("notification sound rejects parent traversal", expected: .unsafePath) {
+        try NotificationSoundPolicy.validateTargetPath(
+            container + "/../../../escape.caf", containerRoot: container
+        )
+    }
+    expectThrows("notification sound rejects absolute targets", expected: .unsafePath) {
+        try NotificationSoundPolicy.validateTargetPath(
+            "/Library/Sounds/local.caf", containerRoot: container
+        )
+    }
+    expectThrows("notification sound rejects backslash paths", expected: .unsafePath) {
+        try NotificationSoundPolicy.validateTargetPath(
+            container + "/Library\\Sounds/local.caf", containerRoot: container
+        )
+    }
+    expectThrows("notification sound rejects missing targets", expected: .targetMissing) {
+        try NotificationSoundPolicy.validateTargetPath(
+            container + "/Library/Sounds/missing.caf", containerRoot: container
+        )
+    }
+    try? FileManager.default.removeItem(at: URL(fileURLWithPath: root))
+}
+
+// ── GrantRetry: permission classification + retry primitive (T-007) ──
+
+do {
+    // errno extraction across the shapes the write paths produce.
+    expect(GrantRetry.errno(of: POSIXError(POSIXErrorCode.EPERM)) == EPERM, "POSIXError EPERM recognized")
+    expect(
+        GrantRetry.errno(of: NSError(domain: NSPOSIXErrorDomain, code: Int(EACCES))) == EACCES,
+        "NSError POSIX-domain EACCES recognized"
+    )
+    expect(
+        GrantRetry.errno(of: NSError(domain: NSCocoaErrorDomain, code: NSFileWriteNoPermissionError)) == EACCES,
+        "CocoaError 513 folds to EACCES"
+    )
+    expect(
+        GrantRetry.errno(of: NSError(domain: NSCocoaErrorDomain, code: NSFileReadNoPermissionError)) == EACCES,
+        "CocoaError 257 folds to EACCES"
+    )
+    expect(
+        GrantRetry.errno(of: BackupError.writeFailed("open /var/x errno 1")) == EPERM,
+        "BackupError.writeFailed embedded errno parsed"
+    )
+    expect(
+        GrantRetry.errno(of: BackupError.writeFailed("write errno 13")) == EACCES,
+        "BackupError.writeFailed write errno parsed"
+    )
+    expect(
+        GrantRetry.errno(of: BackupError.writeFailed("target changed while opening /x")) == 0,
+        "writeFailed without errno maps to 0"
+    )
+    expectFalse(
+        GrantRetry.isPermissionDenied(BackupError.targetMissing("/x")),
+        "targetMissing is not a permission denial"
+    )
+    expectFalse(
+        GrantRetry.isPermissionDenied(BackupError.writeFailed("target changed while opening /x")),
+        "writeFailed without errno is not a permission denial"
+    )
+
+    // Failure-code → localization key mapping (single source of truth for
+    // GrantFailure.errorDescription and the diagnostics export).
+    expect(GrantRetry.failureKey(for: -1) == "sandbox.error.no_app_group", "code -1 mapped")
+    expect(GrantRetry.failureKey(for: -4) == "sandbox.error.swap_failed", "code -4 mapped")
+    expect(GrantRetry.failureKey(for: -8) == "sandbox.error.token_unopenable", "code -8 mapped")
+    expect(GrantRetry.failureKey(for: -254) == "sandbox.error.lstat_denied", "code -254 mapped")
+    expect(GrantRetry.failureKey(for: -999) == "sandbox.error.unknown", "unknown code mapped")
+
+    // Retry primitive with spy grant/invalidate closures.
+    var grantCalls = 0
+    var invalidateCalls = 0
+    let grant: (String) -> Int64 = { _ in grantCalls += 1; return 42 }
+    let invalidate: () -> Void = { invalidateCalls += 1 }
+
+    var bodyCalls = 0
+    let ok = try GrantRetry.withRetry(
+        directory: "/tmp/x", backend: "worse_query", grant: grant, invalidate: invalidate
+    ) {
+        bodyCalls += 1
+        return "done"
+    }
+    expect(ok == "done", "retry: first-attempt success returns the body result")
+    expect(
+        grantCalls == 1 && invalidateCalls == 0 && bodyCalls == 1,
+        "retry: success path grants once, never invalidates, runs body once"
+    )
+
+    grantCalls = 0
+    invalidateCalls = 0
+    var attempts = 0
+    let healed = try GrantRetry.withRetry(
+        directory: "/tmp/x", backend: "worse_query", grant: grant, invalidate: invalidate
+    ) {
+        attempts += 1
+        if attempts == 1 { throw POSIXError(POSIXErrorCode.EPERM) }
+        return "healed"
+    }
+    expect(healed == "healed", "retry: EPERM then success heals")
+    expect(
+        grantCalls == 2 && invalidateCalls == 1 && attempts == 2,
+        "retry: heals with exactly one re-grant cycle and one retry"
+    )
+
+    grantCalls = 0
+    invalidateCalls = 0
+    struct UnrelatedError: Error {}
+    do {
+        _ = try GrantRetry.withRetry(
+            directory: "/tmp/x", backend: "worse_query", grant: grant, invalidate: invalidate
+        ) {
+            throw UnrelatedError()
+        }
+        expect(false, "retry: non-permission error must propagate")
+    } catch {
+        expect(error is UnrelatedError, "retry: non-permission error propagates untranslated")
+        expect(grantCalls == 1 && invalidateCalls == 0, "retry: non-permission error does not invalidate")
+    }
+
+    grantCalls = 0
+    invalidateCalls = 0
+    do {
+        _ = try GrantRetry.withRetry(
+            directory: "/tmp/x", backend: "worse_query", grant: grant, invalidate: invalidate
+        ) {
+            throw POSIXError(POSIXErrorCode.EPERM)
+        }
+        expect(false, "retry: double EPERM must throw GrantFailure")
+    } catch let failure as GrantFailure {
+        if case .writeDenied(let errno, let path, let grantCode) = failure {
+            expect(errno == EPERM, "writeDenied carries the retried errno")
+            expect(path == "/tmp/x", "writeDenied carries the directory")
+            expect(grantCode == 42, "writeDenied carries the retry grant handle")
+        } else {
+            expect(false, "retry: expected writeDenied, got \(failure)")
+        }
+        expect(
+            grantCalls == 2 && invalidateCalls == 1,
+            "retry: double failure runs exactly one re-grant cycle"
+        )
+    } catch {
+        expect(false, "retry: double EPERM threw an unexpected error type")
+    }
+
+    grantCalls = 0
+    invalidateCalls = 0
+    var bodyRan = false
+    let denyGrant: (String) -> Int64 = { _ in grantCalls += 1; return -8 }
+    do {
+        _ = try GrantRetry.withRetry(
+            directory: "/tmp/x", backend: "worse_query", grant: denyGrant, invalidate: invalidate
+        ) {
+            bodyRan = true
+            return "x"
+        }
+        expect(false, "retry: negative grant must throw GrantFailure.denied")
+    } catch let failure as GrantFailure {
+        if case .denied(let code, _, let backend) = failure {
+            expect(code == -8, "denied carries the failing grant code")
+            expect(backend == "worse_query", "denied carries the backend name")
+        } else {
+            expect(false, "retry: expected denied, got \(failure)")
+        }
+        expect(grantCalls == 1 && invalidateCalls == 0, "denied: no invalidate on fast fail")
+    } catch {
+        expect(false, "retry: negative grant threw an unexpected error type")
+    }
+    expectFalse(bodyRan, "denied: the body never runs")
+
+    var grantSequence: [Int64] = [42, -1]
+    let seqGrant: (String) -> Int64 = { _ in grantSequence.removeFirst() }
+    do {
+        _ = try GrantRetry.withRetry(
+            directory: "/tmp/x", backend: "worse_query", grant: seqGrant, invalidate: {}
+        ) {
+            throw POSIXError(POSIXErrorCode.EACCES)
+        }
+        expect(false, "retry: negative retry grant must throw")
+    } catch let failure as GrantFailure {
+        if case .denied(let code, _, _) = failure {
+            expect(code == -1, "retry-denied carries the retry grant code")
+        } else {
+            expect(false, "retry: expected denied on negative retry grant, got \(failure)")
+        }
+    } catch {
+        expect(false, "retry: negative retry grant threw an unexpected error type")
+    }
+}
+
+// ── LaunchServicesStore: synthetic 27.2/27.3 fixtures (T-008, F-07) ──
+// Builds a minimal binary store with one bundle record and the string-table
+// entries it references, then asserts the winning layout label per OS
+// family. Record format (from LaunchServicesStore): 8-byte header with the
+// record size at +4, body fields at layout offsets; string entries are
+// `u32 id + u32 length + bytes` 4-byte aligned; refs are stringID << 2.
+do {
+    func le32(_ value: UInt32) -> [UInt8] {
+        [UInt8(value & 0xff), UInt8((value >> 8) & 0xff),
+         UInt8((value >> 16) & 0xff), UInt8((value >> 24) & 0xff)]
+    }
+
+    // String entry: u32 id, u32 byte length, payload, zero padding to 4.
+    func stringEntry(id: UInt32, _ text: String) -> [UInt8] {
+        var entry = le32(id) + le32(UInt32(text.utf8.count)) + Array(text.utf8)
+        while entry.count % 4 != 0 { entry.append(0) }
+        return entry
+    }
+
+    // One bundle record for a given layout: header (size at +4) + refs at
+    // the layout's body offsets. Unused fields stay 0 — the parser only
+    // requires a valid bundle-id ref.
+    func bundleRecord(bundleSize: UInt32, bundleID: Int, name: Int,
+                      displayName: Int, container: Int,
+                      refs: (bundleID: UInt32, name: UInt32,
+                             displayName: UInt32, container: UInt32)) -> [UInt8] {
+        var body = [UInt8](repeating: 0, count: Int(bundleSize))
+        func put(_ value: UInt32, at offset: Int) {
+            let bytes = le32(value)
+            for (index, byte) in bytes.enumerated() { body[offset + index] = byte }
+        }
+        put(refs.bundleID, at: bundleID)
+        put(refs.name, at: name)
+        put(refs.displayName, at: displayName)
+        put(refs.container, at: container)
+        return le32(0) + le32(bundleSize) + body
+    }
+
+    let bundleIDText = "com.example.fixture"
+    // isDataContainerPath requires exactly prefix + 36 chars and a
+    // UUID-parseable tail — use the canonical dashed form.
+    let realContainer = "/private/var/mobile/Containers/Data/Application/"
+        + "01234567-89AB-CDEF-0123-456789ABCDEF" // 36-char UUID
+
+    // String IDs: 1 = bundle id, 2 = container path. refs = id << 2.
+    let stringsBlob =
+        stringEntry(id: 1, bundleIDText)
+        + stringEntry(id: 2, realContainer)
+
+    let bundleIDRef: UInt32 = 1 << 2
+    let containerRef: UInt32 = 2 << 2
+
+    // 27.2-family fixture: bundle id at 0x0c → the 27.2 layout maps it.
+    let store272 =
+        Array("bdsl".utf8)
+        + le32(UInt32(0x1000)) // header word
+        + bundleRecord(bundleSize: 0x25c, bundleID: 0x0c, name: 0x70,
+                       displayName: 0x78, container: 0x6c,
+                       refs: (bundleIDRef, 0, 0, containerRef))
+        + stringsBlob
+    var padded272 = store272
+    while padded272.count < 0x1000 { padded272.append(0) }
+
+    if let snapshot = LaunchServicesStore.parse(Data(padded272)) {
+        expect(snapshot.containerBundleIDs.values.contains(bundleIDText),
+               "27.2 fixture: bundle id mapped")
+        expect(["27.2", "27.2b", "27.2c", "27.2d", "27.3"].contains(snapshot.layoutLabel),
+               "27.2 fixture: winning layout is the 0x25c family (got \(snapshot.layoutLabel))")
+    } else {
+        expect(false, "27.2 fixture: store failed to parse")
+    }
+
+    // 27.3 variant fixture: bundle id at 0x14 → only the 27.3b candidate
+    // reads a valid ref there, so the 27.3 family must map the container.
+    let store273 =
+        Array("bdsl".utf8)
+        + le32(UInt32(0x1000))
+        + bundleRecord(bundleSize: 0x25c, bundleID: 0x14, name: 0x74,
+                       displayName: 0x7c, container: 0x70,
+                       refs: (bundleIDRef, 0, 0, containerRef))
+        + stringsBlob
+    var padded273 = store273
+    while padded273.count < 0x1000 { padded273.append(0) }
+
+    if let snapshot = LaunchServicesStore.parse(Data(padded273)) {
+        expect(snapshot.containerBundleIDs.values.contains(bundleIDText),
+               "27.3 fixture: bundle id mapped by a 27.3 candidate")
+        expect(snapshot.layoutLabel == "27.3b",
+               "27.3 fixture: winning layout is 27.3b (got \(snapshot.layoutLabel))")
+    } else {
+        expect(false, "27.3 fixture: store failed to parse")
+    }
 }
 
 if failures == 0 {

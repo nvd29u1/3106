@@ -2,6 +2,56 @@
 
 All notable user-facing changes are documented in this file.
 
+## [3.2.6] - 2026-11-17
+
+iOS 27 写入失败专项（spec `02-00-ios27-grant-hardening`）：修复 iOS 27 上文件管理的修改/复制粘贴/替换全部失败时错误被吞、无法归因的问题。授权链四处单点加固 + 失败码诊断透传 + 写入自动重试。新包 SHA256 `8141949c8e57417be0d3e7a32c50d0cdaa5458b68634dd53726f114fba31178d`（`dist/SHA256SUMS.txt` 为准）。真机验证矩阵见下文「验证」。
+
+### Added
+
+- 沙盒诊断页（设置 → 设备 → 沙盒诊断）：实时探测按钮（跑真实授权链含可写性验证）、最近 50 条授权记录表、「复制完整诊断」一键导出（系统版本 / backend / App Group / 探测结果 / LS 布局命中 / 授权记录）。
+- 文件页授权异常横幅：进入容器授权失败或复制粘贴失败时，顶部显示具体失败码的人话解释（如「系统在授权前拒绝访问目标路径」），可文本选中、可一键复制诊断；点掉后下次失败会再次出现。
+- 复制粘贴/替换/删除/Gestalt 写回遇权限拒绝（EPERM/EACCES）自动清令牌缓存 → 重新授权（含可写探针）→ 重试一次；仍失败时报结构化错误（含 errno 与授权码），不再是笼统的"导入失败"。
+- LS 布局表新增 iOS 27.3 候选条目（0x25c 家族三个偏移变体），27.3 的容器解析不再必然落空；诊断导出携带布局命中标签与映射容器数，供远程校准。
+
+### Fixed
+
+- iOS 27 授权链四处单点加固（写入家族全灭的四个可能根因，任一被系统收紧即全量失败）：
+  - 授权前强制 `lstat` 不再是硬门槛——收紧的 27.x 构建会拒绝 stat 未授权路径，曾让所有授权死在 -254（与 bad_query 的 `create=true` 行为对齐）；
+  - container_query flags 从 2 个硬编码候选扩展为 5 个候选 + 按 OS 大版本隔离的学习值（26.x 学到的偏好不再污染 27）+ 全候选轮询自愈；
+  - 令牌验证从"只测可读"升级为可选的"可写探针"——只读令牌不再让授权假成功而写入全挂（浏览/导出等只读流程行为完全不变）；
+  - 设置页/激活状态改用真实探测（30 秒 TTL 缓存），授权链坏时不再假显"已激活"。
+
+### 验证
+
+- macOS 侧：`Tests/run_policy_tests.sh` 283 项（含 GrantRetry 重试协议 spy 单测 + LS 二进制 fixture 解析单测）+ 沙盒静态护栏 + 三语 1469 键对齐，全部通过；`xcodebuild` Release 构建通过。
+- 真机矩阵（需要设备）：27.0 / 27.1 / 27.2.x 回归（进容器 → 复制粘贴 → 替换 → Gestalt 写回各 1 次）；27.3 beta1 回归 + 导出诊断；27.3 beta3（issue #3 报告者）安装验证 + 诊断回报——重点看 -254 是否消失、flags 命中第几个候选、写探针 errno。
+
+## [3.2.5 rebuild] - 2026-11-14
+
+版本号与 build（3.2.5 / 24）保持不变的同版本号重发。新包 SHA256 `aa76f4e5f904fc0eb90a54d35f33c2df8e9ecb54059f526ff880f8dd0ba0fca8`；旧包备份于 `dist/backups/`。新增能力与修复如下（参考 GestaltX v1.1.1 release notes 的问题清单语义）：
+
+### Added
+
+- 应用通知音替换（GestaltX App Audio Library 思路，独立实现）：功能页新增「通知音替换」卡片；维护按应用的容器相对路径表（手动输入，未列出的应用同样可用）；选音频前强制三段风险确认 + 长按确认；替换走任意文件替换管线（自动备份 + 持久记录），记录左滑一键恢复；文件选择器用 `.data` 兜底，侧载包也能选到 `.caf/.m4a` 等音频；格式白名单 aiff/aif/caf/m4a/wav、单文件 ≤20MB；替换后列表立即刷新。
+
+### Fixed
+
+- 字段 plist 导入不再整根覆盖（GestaltX #138）：导入被当作补丁——以设备当前 root 为基准，只合并导入根中显式出现的 `CacheExtra` 键，根级 `CacheData`/`CacheVersion` 等设备专属键全部原值保留，不删除任何键；`CacheUUID` 大小写不敏感比较，不匹配则拒绝导入（#131）；导入完成显示覆盖/跳过/保留计数。
+- 日期与 Data 字段严格解析（GestaltX #132）：ISO8601 日期拒绝尾随文本（往返格式化校验），base64 拒绝非法填充与空白干扰。
+- 备份元数据校验（GestaltX #134）：`.3106save` sidecar 文件名、manifest bundleID、创建时间与归档路径全部先校验再展示/解压；legacy 无 sidecar 存档保留显式兼容分支。
+- `.3106cfg` 导入失败不再静默（GestaltX #133）：增加 App Group 共享收件箱回退（侧载重签名后仍按实际 entitlement 读取），失败时弹 UI 错误。
+- 字段搜索复用一份 preview 快照，键入不再对每个条目重算 preview（GestaltX #136）。
+- 显式编辑的字段不再被预设覆盖（GestaltX #137）：手动编辑过的 `CacheExtra` 键持久记录，预设应用时跳过。
+- plist 精确比较按 CF 类型 + Integer/Real 身份判定（GestaltX #139 语义）：`<true/>` 不再等于 `<integer>1</integer>`，`<integer>1</integer>` 不再等于 `<real>1.0</real>`。
+- 关闭 MobileGestalt 开关不再删键：按原值 CF 类型写同类型假值（Boolean→false / Integer→0 / Real→0.0），与 docs/RISKS.md「不新增不删键」防 iOS 27 重启反弹规则对齐。
+- issue #3 回归护栏：策略门新增静态检查，拒绝 `.allSatisfy(…\.contains)` 形态的裸函数引用；修复 `CleanerView.swift` 残留的同型写法（3.2.5 曾称「全仓唯一一处」失准）。
+- 更新检查删除已废弃的 `AppReleaseDisplayVersion` 读取分支（3.1.8 误报根因残留）；e2e 期望改为从 Info.plist 动态推导，不再硬编码 tag。
+
+### Other
+
+- CI 增加 push/PR 触发（3106/main 分支）；产物哨兵改为从源码动态提取 ≥16 字节特征串，不再手工维护常量。
+- README / README.en 产物说明与 `dist/SHA256SUMS.txt` 修正（只列实际存在的产物，3.3.0 行按文件实算补齐）。
+
 ## [3.2.5] - 2026-11-13
 
 ### Fixed

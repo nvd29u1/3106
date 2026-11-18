@@ -8,6 +8,7 @@ import UniformTypeIdentifiers
 struct GestaltFieldEditorView: View {
     @Environment(\.appLanguage) private var language
     @State private var entries: [GestaltFieldEntry] = []
+    @State private var previewSnapshot: [GestaltEditPolicy.Field] = []
     @State private var searchText = ""
     @State private var isBusy = false
     @State private var activeAlert: FieldEditorAlert?
@@ -15,6 +16,7 @@ struct GestaltFieldEditorView: View {
     @State private var showAddSheet = false
     @State private var showImporter = false
     @State private var hasLoaded = false
+    @State private var importSummary: ImportSummary?
 
     private static let plistType = UTType(filenameExtension: "plist") ?? .data
 
@@ -101,7 +103,19 @@ struct GestaltFieldEditorView: View {
         } header: {
             Label(language.text("gestalt.field.title"), systemImage: "list.bullet.rectangle")
         } footer: {
-            Text(language.text("gestalt.field.footer"))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(language.text("gestalt.field.footer"))
+                if let importSummary {
+                    Text(language.text(
+                        "gestalt.field.import_summary",
+                        importSummary.overwritten,
+                        importSummary.skipped,
+                        importSummary.preserved
+                    ))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                }
+            }
         }
     }
 
@@ -147,13 +161,13 @@ struct GestaltFieldEditorView: View {
         }
     }
 
+    /// GestaltX #136: the preview snapshot is built once by reload(); search
+    /// only filters it, so typing never recomputes previews for plist entries.
     private var filteredEntries: [GestaltFieldEntry] {
-        guard !searchText.isEmpty else { return entries }
-        let query = searchText.lowercased()
-        return entries.filter {
-            $0.key.lowercased().contains(query)
-                || $0.preview.lowercased().contains(query)
-        }
+        let matchedKeys = Set(
+            GestaltEditPolicy.filtered(previewSnapshot, query: searchText).map(\.key)
+        )
+        return entries.filter { matchedKeys.contains($0.key) }
     }
 
     // MARK: - Data
@@ -173,8 +187,12 @@ struct GestaltFieldEditorView: View {
                         )
                     }
                     .sorted { $0.key < $1.key }
+                let snapshot = loaded.map {
+                    GestaltEditPolicy.Field(key: $0.key, preview: $0.preview)
+                }
                 DispatchQueue.main.async {
                     entries = loaded
+                    previewSnapshot = snapshot
                     isBusy = false
                 }
             } catch {
@@ -201,6 +219,7 @@ struct GestaltFieldEditorView: View {
                     cacheExtra[key] = value
                     root["CacheExtra"] = cacheExtra
                     try GestaltPlistIO.writeRoot(root, reason: "field-edit:\(key)")
+                    GestaltExplicitEdits.record(key)
                 }
                 DispatchQueue.main.async {
                     SoundEffects.play(.success)
@@ -288,24 +307,52 @@ struct GestaltFieldEditorView: View {
                 defer { if secured { url.stopAccessingSecurityScopedResource() } }
                 let data = try Data(contentsOf: url)
                 guard
-                    let root = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
-                    root["CacheExtra"] is [String: Any]
+                    let imported = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
+                    imported["CacheExtra"] is [String: Any]
                 else {
                     throw GestaltPresetError.invalidPlist
                 }
-                // Import writes the whole root through the verified pipeline,
-                // so the pre-import state is captured by the automatic backup.
-                try GestaltPlistIO.writeRoot(root, reason: "field-import")
+                // GestaltX #138: the import is a patch. Read, merge and write
+                // under one lock so the four Gestalt pipelines cannot interleave
+                // a stale root between our read and the verified write.
+                let merged = try GestaltPlistIO.withExclusiveAccess {
+                    let snapshot = try GestaltPlistIO.readRootWithFormat()
+                    let result = try GestaltPlistMerge.mergingFieldImport(
+                        current: snapshot.root, imported: imported
+                    )
+                    try GestaltPlistIO.writeRoot(
+                        result.root, reason: "field-import", format: snapshot.format
+                    )
+                    return result
+                }
                 DispatchQueue.main.async {
+                    importSummary = .init(
+                        overwritten: merged.overwritten.count,
+                        skipped: merged.skipped.count,
+                        preserved: merged.preserved
+                    )
                     SoundEffects.play(.success)
                     reload()
                 }
             } catch {
                 DispatchQueue.main.async {
                     SoundEffects.play(.failure)
-                    activeAlert = .message(language.errorText(error))
+                    activeAlert = .message(language.errorText(fieldImportError(error)))
+                    isBusy = false
                 }
             }
+        }
+    }
+
+    private func fieldImportError(_ error: Error) -> Error {
+        guard let mergeError = error as? GestaltMergeError else { return error }
+        switch mergeError {
+        case .missingCacheExtra:
+            return GestaltPresetError.missingCacheExtra
+        case .layoutMismatch:
+            return GestaltFieldImportError.layoutMismatch
+        case .unsupportedValueType:
+            return GestaltPresetError.invalidPlist
         }
     }
 
@@ -319,6 +366,18 @@ struct GestaltFieldEditorView: View {
 }
 
 // MARK: - Supporting types
+
+private struct ImportSummary {
+    let overwritten: Int
+    let skipped: Int
+    let preserved: Int
+}
+
+private enum GestaltFieldImportError: LocalizedError {
+    case layoutMismatch
+
+    var errorDescription: String? { "gestalt.error.layout_mismatch" }
+}
 
 struct GestaltFieldEntry: Identifiable {
     let key: String

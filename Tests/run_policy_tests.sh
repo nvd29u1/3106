@@ -33,8 +33,20 @@ fi
 # a missing key renders the raw key string in the UI.
 "$ROOT/Tests/check_strings_alignment.sh"
 
+# Issue #3 regression: a bare `Set.contains` function reference passed to
+# allSatisfy can resolve to a different overload under whole-module -O.
+if rg -n '\.allSatisfy\([A-Za-z0-9_.]+\.contains\)' "$ROOT/ThreeOneOSSix" --glob '*.swift' >/dev/null; then
+  echo "FAIL: bare contains function reference remains (issue #3)" >&2
+  exit 1
+fi
+
+# iOS 27 grant-chain hardening guardrails (spec 02-00-ios27-grant-hardening):
+# grep-level assertions that lstat/probe/flags/retry hardening stays in place.
+bash "$ROOT/Tests/run_sandbox_static_tests.sh"
+
 swiftc -O \
   "$ROOT/ThreeOneOSSix/helpers/SupportPolicy.swift" \
+  "$ROOT/ThreeOneOSSix/helpers/GrantRetry.swift" \
   "$ROOT/ThreeOneOSSix/helpers/LaunchServicesStore.swift" \
   "$ROOT/ThreeOneOSSix/helpers/ContainerBrowserLogic.swift" \
   "$ROOT/ThreeOneOSSix/helpers/FileBrowserMetadata.swift" \
@@ -53,6 +65,12 @@ swiftc -O \
   "$ROOT/ThreeOneOSSix/helpers/TempSpaceRegistry.swift" \
   "$ROOT/ThreeOneOSSix/helpers/TextPagination.swift" \
   "$ROOT/ThreeOneOSSix/helpers/AppUpdateChecker.swift" \
+  "$ROOT/ThreeOneOSSix/helpers/IdentityComparator.swift" \
+  "$ROOT/ThreeOneOSSix/helpers/GestaltValueParser.swift" \
+  "$ROOT/ThreeOneOSSix/helpers/GestaltPlistMerge.swift" \
+  "$ROOT/ThreeOneOSSix/helpers/BackupMetadataPolicy.swift" \
+  "$ROOT/ThreeOneOSSix/helpers/GestaltEditPolicy.swift" \
+  "$ROOT/ThreeOneOSSix/helpers/NotificationSoundPolicy.swift" \
   "$ROOT/Tests/main.swift" \
   -o "$TMP/policy-tests"
 

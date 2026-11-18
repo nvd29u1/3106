@@ -17,6 +17,9 @@
 		3105A209 /* bad_query.c in Sources */ = {isa = PBXBuildFile; fileRef = 3105A029; };
 		3106W200 /* worse_query.m in Sources */ = {isa = PBXBuildFile; fileRef = 3106W030; };
 		3106W201 /* SandboxAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W033; };
+		3106W901 /* SandboxDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W903; };
+		3106W905 /* GrantRetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W907; };
+		3106W909 /* SandboxDiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W911; };
 		3105A210 /* mcm_bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 3105A030; };
 		3105A220 /* kexploit_opa334.m in Sources */ = {isa = PBXBuildFile; fileRef = 3105A080; };
 		3105A221 /* offsets.m in Sources */ = {isa = PBXBuildFile; fileRef = 3105A081; };
@@ -78,6 +81,15 @@
 		3105E21A /* FileReplaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105E11A; };
 		3105E21B /* GestaltCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105E11B; };
 		3105E21C /* AppVersionComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105E11C; };
+		3106G203 /* GestaltPlistMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G103; };
+		3106G202 /* GestaltValueParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G102; };
+		3106G201 /* IdentityComparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G101; };
+		3106G204 /* BackupMetadataPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G104; };
+		3106G206 /* GestaltExplicitEdits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G106; };
+		3106N201 /* NotificationSoundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106N101; };
+		3106G208 /* NotificationSoundService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G108; };
+		3106G207 /* NotificationSoundPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G107; };
+		3106G205 /* GestaltEditPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106G105; };
 		3105E207 /* AppCardList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105E107; };
 		3105F200 /* wallpaper_zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 3105F100; };
 		3105F201 /* WallpaperLabModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105F102; };
@@ -169,6 +181,8 @@
 		3106W031 /* worse_query.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = worse_query.h; sourceTree = "<group>"; };
 		3106W032 /* ThreeOneOSSix.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ThreeOneOSSix.entitlements; sourceTree = "<group>"; };
 		3106W033 /* SandboxAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxAccess.swift; sourceTree = "<group>"; };
+		3106W903 /* SandboxDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxDiagnostics.swift; sourceTree = "<group>"; };
+		3106W907 /* GrantRetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrantRetry.swift; sourceTree = "<group>"; };
 		3105A041 /* mcm_bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mcm_bridge.h; sourceTree = "<group>"; };
 		3105A050 /* ThreeOneOSSix-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ThreeOneOSSix-Bridging-Header.h"; sourceTree = "<group>"; };
 		3105A060 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -240,10 +254,20 @@
 		3105E116 /* ActivityHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityHistory.swift; sourceTree = "<group>"; };
 		3105E117 /* AltStoreSourceAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AltStoreSourceAdapter.swift; sourceTree = "<group>"; };
 		3105E118 /* BackendNoticeBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendNoticeBanner.swift; sourceTree = "<group>"; };
+		3106W911 /* SandboxDiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxDiagnosticsView.swift; sourceTree = "<group>"; };
 		3105E119 /* FileReplaceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileReplaceService.swift; sourceTree = "<group>"; };
 		3105E11A /* FileReplaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileReplaceView.swift; sourceTree = "<group>"; };
 		3105E11B /* GestaltCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltCardsView.swift; sourceTree = "<group>"; };
 		3105E11C /* AppVersionComparison.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionComparison.swift; sourceTree = "<group>"; };
+		3106G103 /* GestaltPlistMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltPlistMerge.swift; sourceTree = "<group>"; };
+		3106G102 /* GestaltValueParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltValueParser.swift; sourceTree = "<group>"; };
+		3106G101 /* IdentityComparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityComparator.swift; sourceTree = "<group>"; };
+		3106G104 /* BackupMetadataPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupMetadataPolicy.swift; sourceTree = "<group>"; };
+		3106G106 /* GestaltExplicitEdits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltExplicitEdits.swift; sourceTree = "<group>"; };
+		3106N101 /* NotificationSoundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSoundView.swift; sourceTree = "<group>"; };
+		3106G108 /* NotificationSoundService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSoundService.swift; sourceTree = "<group>"; };
+		3106G107 /* NotificationSoundPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSoundPolicy.swift; sourceTree = "<group>"; };
+		3106G105 /* GestaltEditPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestaltEditPolicy.swift; sourceTree = "<group>"; };
 		3105E107 /* AppCardList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCardList.swift; sourceTree = "<group>"; };
 		3105F100 /* wallpaper_zip.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wallpaper_zip.c; sourceTree = "<group>"; };
 		3105F101 /* wallpaper_zip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wallpaper_zip.h; sourceTree = "<group>"; };
@@ -394,6 +418,7 @@
 				3105E106 /* BackupTabView.swift */,
 				3105E108 /* RiskConfirmationView.swift */,
 				3105E118 /* BackendNoticeBanner.swift */,
+				3106W911 /* SandboxDiagnosticsView.swift */,
 				3105E11A /* FileReplaceView.swift */,
 				3105E11B /* GestaltCardsView.swift */,
 				3105E10E /* GestaltFieldEditorView.swift */,
@@ -425,6 +450,7 @@
 				3106T313 /* MigrationProgressView.swift */,
 				3106T314 /* MigrationResumeView.swift */,
 				3106T315 /* MigrationConfigBackupView.swift */,
+				3106N101 /* NotificationSoundView.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -448,6 +474,8 @@
 				3105L105 /* RepositoryPresentationSupport.swift */,
 				3105A113 /* SupportPolicy.swift */,
 				3106W033 /* SandboxAccess.swift */,
+				3106W903 /* SandboxDiagnostics.swift */,
+				3106W907 /* GrantRetry.swift */,
 				3105B114 /* PatchProjectModels.swift */,
 				3105B115 /* PatchPackageCodec.swift */,
 				3105B116 /* PatchKeyStore.swift */,
@@ -472,6 +500,14 @@
 				3105E116 /* ActivityHistory.swift */,
 				3105E117 /* AltStoreSourceAdapter.swift */,
 				3105E11C /* AppVersionComparison.swift */,
+				3106G103 /* GestaltPlistMerge.swift */,
+				3106G102 /* GestaltValueParser.swift */,
+				3106G101 /* IdentityComparator.swift */,
+				3106G104 /* BackupMetadataPolicy.swift */,
+				3106G106 /* GestaltExplicitEdits.swift */,
+				3106G108 /* NotificationSoundService.swift */,
+				3106G107 /* NotificationSoundPolicy.swift */,
+				3106G105 /* GestaltEditPolicy.swift */,
 				3105E119 /* FileReplaceService.swift */,
 				3105E103 /* CleanerSafetyPolicy.swift */,
 				3105E104 /* CleanerHistory.swift */,
@@ -611,6 +647,9 @@
 				3105A205, 3105A206, 3105A207, 3105A209,
 				3106W200,
 				3106W201,
+				3106W901,
+				3106W905,
+				3106W909,
 				3105A210, 3105A220, 3105A221, 3105A222, 3105A223,
 				3105A224, 3105A225,
 				3105A226,
@@ -737,6 +776,15 @@
 				3106T516,
 				3106T517,
 				3106T518,
+				3106G203,
+				3106G202,
+				3106G201,
+				3106G204,
+				3106G206,
+				3106N201,
+				3106G208,
+				3106G207,
+				3106G205,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -761,7 +809,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "ThreeOneOSSix/ThreeOneOSSix.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24;
+				CURRENT_PROJECT_VERSION = 25;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -778,7 +826,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.5;
+				MARKETING_VERSION = 3.2.6;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NVD.1506;
 				PRODUCT_NAME = 3106;
@@ -796,7 +844,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "ThreeOneOSSix/ThreeOneOSSix.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24;
+				CURRENT_PROJECT_VERSION = 25;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -813,7 +861,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2.5;
+				MARKETING_VERSION = 3.2.6;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NVD.1506;
 				PRODUCT_NAME = 3106;

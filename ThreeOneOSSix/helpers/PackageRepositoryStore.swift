@@ -501,7 +501,7 @@ enum PackageRepositoryNetworkClient {
         return try Data(contentsOf: fileURL, options: .mappedIfSafe)
     }
 
-    /// Download an upstream IPA into Documents/NVD 1506/IPAs, overwriting a
+    /// Download an upstream IPA into Documents/3106/IPAs, overwriting a
     /// previous release of the same app (bundle identifier is the name key).
     /// 512 MB cap: upstream releases are single-digit MB to a few hundred;
     /// anything larger is almost certainly a wrong link.

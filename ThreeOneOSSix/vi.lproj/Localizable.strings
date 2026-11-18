@@ -428,6 +428,30 @@
 "browser.error_invalid_name" = "Hãy nhập tên tệp hoặc thư mục hợp lệ.";
 "browser.error_name_too_long" = "Tên này quá dài.";
 "browser.error_exists" = "Đã có một mục trùng tên.";
+"sandbox.error.no_app_group" = "Ứng dụng không thể cấp quyền sandbox: thiếu quyền App Group (hãy giữ App Groups khi ký lại).";
+"sandbox.error.query_api" = "Ứng dụng không thể cấp quyền sandbox: lời gọi API truy vấn vùng chứa của hệ thống thất bại.";
+"sandbox.error.swap_failed" = "Ứng dụng không thể cấp quyền sandbox: không thể chuẩn bị vùng chứa nhóm ứng dụng (hoán đổi Library/Caches thất bại).";
+"sandbox.error.token" = "Ứng dụng không thể cấp quyền sandbox: hệ thống không cấp mã truy cập.";
+"sandbox.error.token_unopenable" = "Ứng dụng không thể cấp quyền sandbox: mã truy cập không thể mở đường dẫn đích.";
+"sandbox.error.token_read_only" = "Ứng dụng không thể cấp quyền sandbox: hệ thống cấp mã chỉ đọc; việc ghi sẽ bị từ chối.";
+"sandbox.error.lstat_denied" = "Ứng dụng không thể cấp quyền sandbox: hệ thống từ chối truy cập đường dẫn đích trước khi cấp quyền.";
+"sandbox.error.unknown" = "Ứng dụng không thể cấp quyền sandbox: lỗi không xác định.";
+"sandbox.error.write_denied" = "Hệ thống từ chối ghi (không đủ quyền). Đã tự động thử lại một lần nhưng vẫn thất bại.";
+"sandbox.error.write_denied_ro" = "Hệ thống từ chối ghi (đích chỉ đọc). Đã tự động thử lại một lần nhưng vẫn thất bại.";
+"sandbox.banner.title" = "Lỗi cấp quyền";
+"sandbox.banner.generic" = "Lần cấp quyền sandbox gần nhất thất bại. Hãy sao chép thông tin chẩn đoán để báo cáo.";
+"sandbox.banner.copy" = "Sao chép chẩn đoán";
+"sandbox.diag.title" = "Chẩn đoán sandbox";
+"sandbox.diag.section_backend" = "Trạng thái backend";
+"sandbox.diag.probe_state" = "Kết quả dò trực tiếp";
+"sandbox.diag.probe_not_run" = "Chưa chạy";
+"sandbox.diag.probe_running" = "Đang dò…";
+"sandbox.diag.probe_run" = "Chạy dò";
+"sandbox.diag.section_grants" = "Bản ghi cấp quyền gần đây (mới → cũ)";
+"sandbox.diag.grants_footer" = "Giữ tối đa 50 kết quả cấp quyền gần nhất để xử lý lỗi ghi trên iOS 27.";
+"sandbox.diag.copy" = "Sao chép chẩn đoán đầy đủ";
+"sandbox.diag.copied" = "Đã sao chép";
+"sandbox.diag.export_footer" = "Văn bản chẩn đoán gồm phiên bản hệ điều hành, backend, App Group, kết quả dò và các lần cấp quyền gần đây — dán trực tiếp vào báo cáo.";
 "browser.error_source_missing" = "Không thể truy cập tệp nguồn đã chọn.";
 "browser.error_destination_missing" = "Thư mục đích không còn tồn tại.";
 "browser.error_source_directory" = "Hãy chọn một tệp, không phải thư mục.";
@@ -1446,3 +1470,37 @@
 "update.failure.http" = "Kiểm tra thất bại: GitHub trả về lỗi (HTTP %d, có thể bị giới hạn — thử lại sau).";
 "update.failure.offline" = "Kiểm tra thất bại: không kết nối được GitHub (ngoại tuyến hoặc bị chặn — cần proxy/mạng khác).";
 "update.failure.other" = "Kiểm tra thất bại:";
+
+// GestaltX v1.1.1 #138 field-import merge (3.2.5 rebuild)
+"gestalt.error.layout_mismatch" = "Định danh bộ nhớ đệm trong plist nhập không khớp thiết bị này; đã từ chối ghi.";
+"gestalt.field.import_summary" = "Nhập xong: ghi đè %d, bỏ qua %d khóa không xác định, giữ %d mục.";
+
+// GestaltX v1.1.1 #133 config import errors (3.2.5 rebuild)
+"config.import_error.title" = "Nhập gói cấu hình thất bại";
+
+// Notification sound replacement (3.2.5 rebuild, GestaltX App Audio Library parity)
+"home.card.sounds" = "Thay âm báo";
+"home.card.sounds_detail" = "Thay âm báo của ứng dụng bằng âm thanh tùy chọn";
+"notification.sound.title" = "Thay âm báo";
+"notification.sound.add" = "Thêm mục tiêu";
+"notification.sound.empty" = "Chưa có mục tiêu. Nhấn + để thêm, hoặc thay thế để tự ghi nhận.";
+"notification.sound.targets_header" = "Đường dẫn âm báo";
+"notification.sound.targets_footer" = "Đường dẫn tương đối trong container; tệp gốc luôn được sao lưu trước khi thay.";
+"notification.sound.installed_header" = "Bản ghi thay thế";
+"notification.sound.installed_footer" = "Vuốt bản ghi để khôi phục âm thanh gốc từ bản sao lưu.";
+"notification.sound.installed_empty" = "Chưa có bản ghi thay thế.";
+"notification.sound.replace" = "Thay âm thanh";
+"notification.sound.restore" = "Khôi phục gốc";
+"notification.sound.field_bundle" = "Bundle ID";
+"notification.sound.field_name" = "Tên ứng dụng (không bắt buộc)";
+"notification.sound.field_path" = "Đường dẫn tương đối của tệp âm báo";
+"notification.sound.add_footer" = "Đường dẫn thường dạng Library/Sounds/local.caf; định dạng aiff/aif/caf/m4a/wav, tối đa 20MB mỗi tệp.";
+"notification.sound.risk.title" = "Thay âm báo";
+"notification.sound.risk.consequence" = "Âm thanh đã chọn sẽ ghi đè tệp âm báo của ứng dụng; có hiệu lực ngay lập tức.";
+"notification.sound.risk.worst_case" = "Nếu ứng dụng từ chối định dạng hoặc tệp hỏng, ứng dụng có thể ngừng phát âm báo cho đến khi khôi phục.";
+"notification.sound.risk.confirm" = "Giữ để xác nhận thay thế";
+"notification.sound.risk.recovery" = "Tệp gốc được sao lưu tự động; vuốt bản ghi để khôi phục, hoặc khôi phục thủ công trong trình duyệt tệp.";
+"notification.sound.error.extension" = "Định dạng âm thanh không được hỗ trợ (chỉ aiff/aif/caf/m4a/wav).";
+"notification.sound.error.container" = "Không thể xác định container của ứng dụng. Hãy đảm bảo ứng dụng đã cài và container truy cập được.";
+"notification.sound.error.target" = "Đường dẫn mục tiêu không hợp lệ.";
+"notification.sound.error.source" = "Không thể đọc tệp âm thanh đã chọn.";

@@ -182,6 +182,11 @@ struct SettingsView: View {
                     LabeledContent(language.text("settings.ios_version"), value: "\(AppInfo.osVersion) (\(AppInfo.osBuild))")
                     LabeledContent(language.text("settings.access_backend"), value: SandboxAccess.backend.displayName)
                     LabeledContent(language.text("settings.app_group"), value: appGroupStatus)
+                    NavigationLink {
+                        SandboxDiagnosticsView()
+                    } label: {
+                        Label(language.text("sandbox.diag.title"), systemImage: "stethoscope")
+                    }
                 }
 
                 Section {
@@ -232,8 +237,7 @@ struct SettingsView: View {
     }
 
     private var appVersion: String {
-        Bundle.main.object(forInfoDictionaryKey: "AppReleaseDisplayVersion") as? String
-            ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
             ?? "1.0"
     }
 

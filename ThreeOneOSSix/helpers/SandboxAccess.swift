@@ -120,10 +120,12 @@ enum SandboxAccess {
             }
             // Exercise the real query path on our own group container first;
             // the parent container root is not grantable on every iOS 26 build.
-            if grant(path: groupURL.path) >= 0 {
+            // The writable grant runs the T-005 write probe, so a read-only
+            // token no longer passes activation (spec D-04).
+            if grant(path: groupURL.path, writable: true) >= 0 {
                 return true
             }
-            let handle = grant(path: ContainerStore.appDataRoot)
+            let handle = grant(path: ContainerStore.appDataRoot, writable: true)
             if handle >= 0 {
                 return true
             }
@@ -134,19 +136,124 @@ enum SandboxAccess {
         }
     }
 
-    static func grant(path: String) -> Int64 {
+    // MARK: - Cached probe (T-006)
+
+    private static let probeCacheLock = NSLock()
+    private static var probeCache: (value: Bool, at: Date)?
+    private static let probeCacheTTL: TimeInterval = 30
+
+    /// `probe()` with a 30-second TTL cache. `hasSandboxAccess()` runs on
+    /// every listFiles refresh (ContainerStore), so the real grant chain must
+    /// not re-run per refresh. `invalidateWorseQueryCache()` clears this so a
+    /// retry never trusts a stale probe result.
+    static func probeCached() -> Bool {
+        probeCacheLock.lock()
+        if let cached = probeCache, Date().timeIntervalSince(cached.at) < probeCacheTTL {
+            probeCacheLock.unlock()
+            return cached.value
+        }
+        probeCacheLock.unlock()
+
+        let value = probe()
+        probeCacheLock.lock()
+        probeCache = (value, Date())
+        probeCacheLock.unlock()
+        return value
+    }
+
+    static func grant(path: String, writable: Bool = false) -> Int64 {
         let clean = path.hasSuffix("/") && path.count > 1 ? String(path.dropLast()) : path
+        let handle: Int64
         switch backend {
         case .kernel:
-            return -1
+            handle = -1
         case .badQuery:
             var pathC = clean.utf8CString.map { Int8($0) }
-            return bad_query(&pathC, true, nil, false)
+            handle = bad_query(&pathC, true, nil, false)
         case .worseQuery:
             var pathC = clean.utf8CString.map { Int8($0) }
-            return worse_query_grant(&pathC)
+            // writable=true routes through grant_ex so a read-only token can
+            // no longer fake a successful grant (spec D-03.3/D-04).
+            handle = writable ? worse_query_grant_ex(&pathC, 1) : worse_query_grant(&pathC)
         case .unsupported:
-            return -1
+            handle = -1
+        }
+        // Diagnostics-only side effect (spec 02-00-ios27-grant-hardening):
+        // the ~20 call sites keep treating the return value as opaque, so
+        // failures surface here instead of being swallowed upstream.
+        SandboxDiagnostics.record(code: handle, path: clean, backend: backend.displayName)
+        return handle
+    }
+
+    /// Throwing variant for services that surface grant failures to the user
+    /// instead of letting a negative handle cascade into a generic write error.
+    static func grantOrThrow(path: String, writable: Bool = false) throws -> Int64 {
+        let handle = grant(path: path, writable: writable)
+        guard handle >= 0 else {
+            throw GrantFailure.denied(
+                code: handle,
+                path: path,
+                backend: backend.displayName
+            )
+        }
+        return handle
+    }
+
+    /// Drops every cached worse_query token. Used by the retry path when a
+    /// write hits EPERM/EACCES despite a successful grant — a stale token in
+    /// the LRU cache is the usual suspect.
+    static func invalidateWorseQueryCache() {
+        guard backend == .worseQuery else { return }
+        worse_query_forget_all()
+        probeCacheLock.lock()
+        probeCache = nil
+        probeCacheLock.unlock()
+        log("sandbox: worse_query token cache invalidated")
+    }
+
+    /// Grant → body → on EPERM/EACCES drop the token cache, re-grant and
+    /// retry the body exactly once (spec D-05). Backend split:
+    /// - kernel (iOS 17/18): grants do not exist here (-1 = "not needed"),
+    ///   the body runs bare, exactly like the pre-hardening call sites that
+    ///   ignored the handle.
+    /// - badQuery (26.0–26.6.1): legacy grant-then-run semantics, no retry
+    ///   (that backend has its own, already-verified behavior).
+    /// - worseQuery (26.7+/27): the full retry chain via GrantRetry.withRetry.
+    ///
+    /// macOS harness note: on macOS the backend resolves to worseQuery
+    /// (Darwin 27) but grants are meaningless — grant returns -1 and the
+    /// verify_* harnesses rely on that being non-fatal — so the retry chain
+    /// is iOS-only.
+    static func withGrant<T>(
+        directory: String,
+        writable: Bool = false,
+        body: () throws -> T
+    ) throws -> T {
+        switch backend {
+        case .kernel:
+            return try body()
+        case .badQuery:
+            _ = grant(path: directory)
+            return try body()
+        case .worseQuery:
+#if os(iOS)
+            return try GrantRetry.withRetry(
+                directory: directory,
+                backend: backend.displayName,
+                grant: { grant(path: $0, writable: writable) },
+                invalidate: { invalidateWorseQueryCache() },
+                body: body
+            )
+#else
+            _ = grant(path: directory, writable: writable)
+            return try body()
+#endif
+        case .unsupported:
+            throw GrantFailure.denied(
+                code: -1,
+                path: directory,
+                backend: backend.displayName
+            )
         }
     }
 
