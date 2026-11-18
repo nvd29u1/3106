@@ -5,6 +5,17 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
+# NVD 1506 merged build: fetch AirliftFFI.xcframework (Wallet card skins).
+# TEMPORARY: this call belongs in the CI workflow file
+# (.github/workflows/build-unsigned-ipa.yml, "Fetch AirliftFFI.xcframework"
+# step), but the GitHub token used for API pushes has only the `repo` scope
+# (no `workflow` scope), so the workflow file cannot be updated through the
+# API (GitHub answers 404). Until the token is renewed with `repo` +
+# `workflow` scopes, the fetch runs here — run_policy_tests.sh is the only
+# repo script the workflow executes before the build step. See
+# scripts/fetch-airlift-ffi.sh; move this call into the workflow then.
+bash "$ROOT/scripts/fetch-airlift-ffi.sh"
+
 PLIST="$ROOT/ThreeOneOSSix/Info.plist"
 PROJECT="$ROOT/ThreeOneOSSix.xcodeproj/project.pbxproj"
 
