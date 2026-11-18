@@ -100,6 +100,76 @@ enum CleanerSafetyPolicy {
         protectedBundleIDs.contains(bundleID)
     }
 
+    // MARK: - Ported path-safety predicates (WQCacheSafety.h)
+
+    /// Verbatim port of `WQCacheSafetyHasNoSymlinkAncestry`
+    /// (`WQCacheSafety.h`, WQFiles v0.9.18): checks every existing
+    /// component, including the final component when present, without
+    /// following links. A missing final component is allowed for scan-time
+    /// snapshots when `allowMissingFinal` is set, but a missing ancestor
+    /// is never accepted.
+    static func hasNoSymlinkAncestry(_ path: String, allowMissingFinal: Bool) -> Bool {
+        guard path.hasPrefix("/"), !path.isEmpty else { return false }
+        let components = (path as NSString).pathComponents
+        guard components.count >= 2, components.first == "/" else { return false }
+        var prefix = "/"
+        for index in 1..<components.count {
+            let component = components[index]
+            guard component != "." && component != ".." else { return false }
+            prefix = (prefix as NSString).appendingPathComponent(component)
+            var st = stat()
+            if lstat(prefix, &st) != 0 {
+                if allowMissingFinal && index == components.count - 1 && errno == ENOENT {
+                    return true
+                }
+                return false
+            }
+            if (st.st_mode & S_IFMT) == S_IFLNK { return false }
+        }
+        return true
+    }
+
+    /// Verbatim port of `WQCacheSafetyCanonicalPath` (`WQCacheSafety.h`):
+    /// resolves an existing path with the filesystem's canonical spelling.
+    /// For a missing final component, resolves its existing parent and
+    /// appends the final component without following it.
+    static func canonicalPath(_ path: String) -> String {
+        let standardized = (path as NSString).standardizingPath
+        var resolved = [CChar](repeating: 0, count: Int(PATH_MAX))
+        if realpath(standardized, &resolved) != nil {
+            return String(cString: resolved)
+        }
+        let parent = (standardized as NSString).deletingLastPathComponent
+        let last = (standardized as NSString).lastPathComponent
+        if realpath(parent, &resolved) != nil {
+            return (String(cString: resolved) as NSString).appendingPathComponent(last)
+        }
+        return standardized
+    }
+
+    /// Verbatim port of `WQCacheSafetyTargetMatchesContainer`
+    /// (`WQCacheSafety.h`): the lexical shape, no-follow ancestry, and
+    /// canonical shape must all agree with
+    /// `<container>/<relativePath>`.
+    static func targetMatchesContainer(
+        target: String, container: String, relativePath: String
+    ) -> Bool {
+        guard !relativePath.isEmpty, !relativePath.hasPrefix("/") else { return false }
+        let relativeComponents = (relativePath as NSString).pathComponents
+        guard !relativeComponents.contains("."),
+              !relativeComponents.contains("..") else { return false }
+        let lexicalTarget = (target as NSString).standardizingPath
+        let lexicalExpected = ((container as NSString)
+            .appendingPathComponent(relativePath) as NSString).standardizingPath
+        guard lexicalTarget == lexicalExpected else { return false }
+        guard hasNoSymlinkAncestry(target, allowMissingFinal: true) else { return false }
+        guard hasNoSymlinkAncestry(container, allowMissingFinal: false) else { return false }
+        let canonicalContainer = canonicalPath(container)
+        let canonicalTarget = canonicalPath(target)
+        let canonicalExpected = (canonicalContainer as NSString).appendingPathComponent(relativePath)
+        return canonicalTarget == canonicalExpected
+    }
+
     /// A planned cleanup target: relative allowlist entry inside a container.
     struct PlannedTarget {
         let containerRoot: String

@@ -54,6 +54,10 @@ struct FileBrowserView: View {
     @State private var transferFailedMessage: String?
     @State private var grantBannerDismissed = false
     @State private var deleteTargets: [FileEntry] = []
+    @State private var pendingCustomTargetEntry: FileEntry?
+    @State private var pendingCustomTargetBundleID: String?
+    @State private var pendingCustomTargetAppName: String?
+    @State private var isCustomTargetPromptPresented = false
     @State private var viewerRequest: FileViewerRequest?
     @ObservedObject private var favoritesStore = FileFavoritesStore.shared
     @AppStorage(FileBrowserSortOrder.storageKey)
@@ -418,6 +422,25 @@ struct FileBrowserView: View {
                 transferConflict?.destinationURL.lastPathComponent ?? ""
             ))
         }
+        .confirmationDialog(
+            language.text("cleaner.custom_add_title"),
+            isPresented: $isCustomTargetPromptPresented,
+            titleVisibility: .visible
+        ) {
+            Button(language.text("cleaner.custom_add_always")) {
+                addCustomTarget(autoSelect: true)
+            }
+            Button(language.text("cleaner.custom_add_manual")) {
+                addCustomTarget(autoSelect: false)
+            }
+            Button(language.text("common.cancel"), role: .cancel) {
+                pendingCustomTargetEntry = nil
+                pendingCustomTargetBundleID = nil
+                pendingCustomTargetAppName = nil
+            }
+        } message: {
+            Text(customTargetPromptMessage)
+        }
         .alert(item: $operationNotice) { notice in
             Alert(
                 title: Text(notice.title),
@@ -598,6 +621,21 @@ struct FileBrowserView: View {
                     )
                 }
             }
+            // "Add to Cache Cleaner" (WQFiles parity:
+            // wq_toggle_cache_cleaner_target): only inside an app container
+            // and only for a valid custom-target path.
+            if ContainerStore.isApplicationContainerPath(containerPath),
+               CleanerCustomTargets.relativeForPath(entry.path) != nil {
+                let alreadyAdded = CleanerCustomTargets.target(forPath: entry.path) != nil
+                Button {
+                    toggleCustomTarget(entry)
+                } label: {
+                    Label(
+                        language.text(alreadyAdded ? "cleaner.custom_remove" : "cleaner.custom_add"),
+                        systemImage: alreadyAdded ? "minus.circle" : "trash.circle"
+                    )
+                }
+            }
             if !entry.isDirectory, entry.name.lowercased().hasSuffix(".zip") {
                 Button {
                     extractArchive(entry)
@@ -645,6 +683,79 @@ struct FileBrowserView: View {
             ]
         )
         filesTabSession.wrappedValue = updatedSession
+    }
+
+    // MARK: - Add to Cache Cleaner (port of wq_toggle_cache_cleaner_target)
+
+    private var customTargetPromptMessage: String {
+        guard let entry = pendingCustomTargetEntry else { return "" }
+        let app = pendingCustomTargetAppName ?? pendingCustomTargetBundleID ?? ""
+        let scope = language.text(
+            entry.isDirectory
+                ? "cleaner.custom_add_folder_message"
+                : "cleaner.custom_add_file_message",
+            entry.name, app
+        )
+        return scope + "\n\n" + language.text("cleaner.custom_add_hint")
+    }
+
+    private func toggleCustomTarget(_ entry: FileEntry) {
+        // Already added: take it off the list (nothing is deleted).
+        if let existing = CleanerCustomTargets.target(forPath: entry.path) {
+            CleanerCustomTargets.remove(
+                bundleID: existing.bundleID, relativePath: existing.relativePath
+            )
+            operationNotice = FileReplacementNotice(
+                title: language.text("cleaner.custom_removed_title"),
+                message: language.text("cleaner.custom_removed_message", entry.name)
+            )
+            return
+        }
+        // The view's bundleID can be a UUID for unidentified containers;
+        // only a real bundle ID (or the container metadata) identifies the app.
+        let metadata = ContainerStore.readContainerMetadata(containerPath: containerPath)
+        let viewBundleID = bundleID.flatMap { UUID(uuidString: $0) == nil ? $0 : nil }
+        guard let resolvedBundleID = viewBundleID ?? metadata?.bundleID,
+              !resolvedBundleID.isEmpty else {
+            operationNotice = FileReplacementNotice(
+                title: language.text("cleaner.custom_not_added_title"),
+                message: language.text("cleaner.custom_not_identified")
+            )
+            return
+        }
+        pendingCustomTargetEntry = entry
+        pendingCustomTargetBundleID = resolvedBundleID
+        pendingCustomTargetAppName = metadata?.displayName.isEmpty == false
+            ? metadata?.displayName : resolvedBundleID
+        isCustomTargetPromptPresented = true
+    }
+
+    private func addCustomTarget(autoSelect: Bool) {
+        guard let entry = pendingCustomTargetEntry,
+              let bundleID = pendingCustomTargetBundleID,
+              let split = CleanerCustomTargets.relativeForPath(entry.path) else {
+            pendingCustomTargetEntry = nil
+            pendingCustomTargetBundleID = nil
+            pendingCustomTargetAppName = nil
+            return
+        }
+        CleanerCustomTargets.add(
+            CleanerCustomTarget(
+                bundleID: bundleID,
+                appName: pendingCustomTargetAppName ?? bundleID,
+                containerPath: split.container,
+                relativePath: split.relative,
+                isFile: !entry.isDirectory,
+                autoSelect: autoSelect
+            )
+        )
+        operationNotice = FileReplacementNotice(
+            title: language.text("cleaner.custom_added_title"),
+            message: language.text("cleaner.custom_added_message", entry.name)
+        )
+        pendingCustomTargetEntry = nil
+        pendingCustomTargetBundleID = nil
+        pendingCustomTargetAppName = nil
     }
 
     private func createManualBackup(for entry: FileEntry) {

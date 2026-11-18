@@ -1,9 +1,11 @@
 import SwiftUI
 import UIKit
+import AirliftFFI
 
 @main
 struct ThreeOneOSSixApp: App {
     @StateObject private var appState = AppState()
+    @StateObject private var walletStore: WalletCardStore
     @StateObject private var patchDraftCoordinator = PatchDraftCoordinator()
     @StateObject private var fileOperationCoordinator = FileOperationCoordinator()
     @StateObject private var patchStore = PatchProjectStore()
@@ -19,6 +21,18 @@ struct ThreeOneOSSixApp: App {
 
     init() {
         setupLogCapture()
+        // Wallet (Airlift): route Rust tracing/idevice logs into the shared log sink.
+        al_log_init({ _, msg in
+            guard let msg = msg else { return }
+            let line = String(cString: msg)
+            DispatchQueue.main.async {
+                log("airlift: \(line)")
+            }
+        }, nil)
+        // Ensure the ALGetGrappaToken symbol is retained and linked into the binary
+        // (the Rust side resolves it dynamically via dlsym).
+        _ = ALGetGrappaToken(0, 0, 0, nil, 0, nil, nil, 0)
+        _walletStore = StateObject(wrappedValue: WalletCardStore())
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let appBuild = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
         log("app: NVD 1506 \(appVersion) (\(appBuild)) launching — iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) \(AppInfo.machineName)")
@@ -83,6 +97,7 @@ struct ThreeOneOSSixApp: App {
             ZStack {
                 ContentView()
                     .environmentObject(appState)
+                    .environmentObject(walletStore)
                     .environmentObject(patchDraftCoordinator)
                     .environmentObject(fileOperationCoordinator)
                     .environmentObject(patchStore)
@@ -171,6 +186,21 @@ struct ThreeOneOSSixApp: App {
         }
     }
 }
+
+/// Grappa token provider (GrappaHelper.m). Declared here via @_silgen_name so
+/// the Rust side can resolve ALGetGrappaToken with dlsym; no bridging-header
+/// change is needed. See wallet/GrappaHelper.h.
+@_silgen_name("ALGetGrappaToken")
+func ALGetGrappaToken(
+    _ inVersion: UInt32,
+    _ inDeviceType: UInt32,
+    _ inProtocolVersion: UInt32,
+    _ outBuf: UnsafeMutablePointer<UInt8>?,
+    _ maxLen: Int,
+    _ outLen: UnsafeMutablePointer<Int>?,
+    _ errBuf: UnsafeMutablePointer<CChar>?,
+    _ errLen: Int
+) -> Int32
 
 class AppState: ObservableObject {
     @Published var exploitStatus: ExploitStatus = .notStarted

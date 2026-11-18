@@ -186,6 +186,8 @@ struct ContentView: View {
                 onOpenSettings: openSettings,
                 onOpenLogs: openLogs
             )
+        case .walletCards:
+            WalletCardsView()
         }
     }
 

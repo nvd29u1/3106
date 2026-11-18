@@ -23,6 +23,14 @@ enum CleanerSortOrder: String, CaseIterable, Identifiable {
 }
 
 enum CleanerCatalog {
+    /// Rows below this size are omitted from the list when both of their
+    /// directories were fully measured (WQFiles parity:
+    /// `WQCache.m -scan` drops `cacheBytes + tempBytes < 64 * 1024`).
+    /// Limited rows are always kept, whatever their size.
+    static let minimumVisibleBytes: Int64 = 64 * 1024
+
+    /// Select Large Caches threshold (WQFiles parity: 50 MB, decimal).
+    static let largeCacheThresholdBytes: Int64 = 50_000_000
     static func sorted<Record>(
         _ records: [Record],
         order: CleanerSortOrder,
@@ -57,6 +65,38 @@ enum CleanerCatalog {
         selectedBundleIDs.union(visibleBundleIDs)
     }
 
+    /// Invert Selection (WQFiles parity: `selectWhere: !it.selected`).
+    /// Visible rows flip; rows outside the current view are untouched.
+    static func invertedVisible(
+        _ visibleBundleIDs: [String],
+        selected selectedBundleIDs: Set<String>
+    ) -> Set<String> {
+        var updated = selectedBundleIDs
+        for bundleID in visibleBundleIDs {
+            if updated.contains(bundleID) {
+                updated.remove(bundleID)
+            } else {
+                updated.insert(bundleID)
+            }
+        }
+        return updated
+    }
+
+    /// Select Large Caches (WQFiles parity: total bytes >= 50 MB).
+    /// `visible` carries each visible row's id and size; non-large visible
+    /// rows are left as they are.
+    static func selectingLarge(
+        _ visible: [(id: String, bytes: Int64)],
+        threshold: Int64 = largeCacheThresholdBytes,
+        preserving selectedBundleIDs: Set<String>
+    ) -> Set<String> {
+        var updated = selectedBundleIDs
+        for row in visible where row.bytes >= threshold {
+            updated.insert(row.id)
+        }
+        return updated
+    }
+
     static func scanNewApplications(
         _ applications: [CleanerResolvedApplication],
         scannedBundleIDs: inout Set<String>,
@@ -65,10 +105,12 @@ enum CleanerCatalog {
         isValidContainerPath: (String) -> Bool,
         usageForContainer: (String) -> LimitedCleanerUsage?,
         onApplication: ((String) -> Void)? = nil,
-        onRecord: ((CleanerCatalogRecord) -> Void)? = nil
+        onRecord: ((CleanerCatalogRecord) -> Void)? = nil,
+        shouldStop: (() -> Bool)? = nil
     ) -> [CleanerCatalogRecord] {
         var records: [CleanerCatalogRecord] = []
         for application in applications {
+            if shouldStop?() == true { break }
             let bundleID = application.bundleID
             defer { onApplication?(bundleID) }
             // Do not mark an app as scanned until its container was actually
@@ -79,7 +121,7 @@ enum CleanerCatalog {
                   let containerPath = activateContainer(application),
                   isValidContainerPath(containerPath),
                   let usage = usageForContainer(containerPath),
-                  usage.totalBytes > 0 else {
+                  usage.totalBytes >= minimumVisibleBytes || usage.limited else {
                 continue
             }
             scannedBundleIDs.insert(bundleID)

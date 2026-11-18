@@ -102,6 +102,16 @@ struct FeatureHubView: View {
                             icon: "photo.on.rectangle.angled"
                         )
                     }
+
+                    NavigationLink {
+                        WalletCardsView()
+                    } label: {
+                        card(
+                            "home.card.wallet",
+                            detail: "home.card.wallet_detail",
+                            icon: "creditcard"
+                        )
+                    }
                 } header: {
                     Text(language.text("home.section.device"))
                 }

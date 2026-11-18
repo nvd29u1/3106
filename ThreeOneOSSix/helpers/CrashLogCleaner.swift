@@ -1,8 +1,19 @@
 import Foundation
+import Darwin
 
 struct CrashLogSummary: Equatable {
     let fileCount: Int
     let bytes: Int64
+    /// True when a crash-log folder exists but could not be fully measured
+    /// on this device (WQFiles parity: the section is shown as limited
+    /// instead of silently reporting 0).
+    let limited: Bool
+
+    init(fileCount: Int, bytes: Int64, limited: Bool = false) {
+        self.fileCount = fileCount
+        self.bytes = bytes
+        self.limited = limited
+    }
 }
 
 struct CrashLogCleanResult: Equatable {
@@ -14,20 +25,82 @@ struct CrashLogCleanResult: Equatable {
 /// Removes only crash/panic/diagnostic log files under known user log
 /// directories. Symlinks and anything outside those roots are refused.
 enum CrashLogCleaner {
-    static let rootPath = "/private/var/mobile/Library/Logs/CrashReporter"
+    /// The two exact CrashReporter candidates (WQFiles parity:
+    /// `WQCacheCrashLogCandidates`, `WQCache.m:25-29`): mobile's Library,
+    /// and the osanalytics system group as a fallback. The mobile folder
+    /// does not exist on iOS 27.0.1, which is when the second one matters.
+    static let candidatePaths = [
+        "/private/var/mobile/Library/Logs/CrashReporter",
+        "/private/var/containers/Shared/SystemGroup/systemgroup.com.apple.osanalytics/Library/Logs/CrashReporter",
+    ]
+    /// Kept for existing callers: the first (mobile) candidate.
+    static let rootPath = candidatePaths[0]
     private static let allowedExtensions: Set<String> = [
         "ips", "crash", "panic", "log", "synced", "diag",
     ]
     private static let maximumFiles = 10_000
 
+    /// Port of `WQCacheCrashPathIsSafe` (`WQCache.m:221-228`): one of the
+    /// known crash-log folders, spelled exactly, with no link on the way
+    /// and resolving to itself.
+    static func isSafeCrashPath(_ path: String) -> Bool {
+        candidatePaths.contains(path)
+            && CleanerSafetyPolicy.hasNoSymlinkAncestry(path, allowMissingFinal: true)
+            && CleanerSafetyPolicy.canonicalPath(path) == path
+    }
+
+    /// The first candidate that exists and passes the safety check, with a
+    /// sandbox grant when needed. Returns nil + limited=true when a
+    /// candidate exists but cannot be read even with a grant (WQFiles
+    /// parity: left out / reported limited instead of showing 0).
+    static func resolvedRoot() -> (path: String, limited: Bool) {
+        for candidate in candidatePaths {
+            var st = stat()
+            if lstat(candidate, &st) != 0 {
+                if errno == EPERM || errno == EACCES {
+                    let grant = ContainerStore.grantContainerAccess(candidate)
+                    defer { SandboxAccess.release(grant) }
+                    if lstat(candidate, &st) != 0 { continue }
+                } else {
+                    continue
+                }
+            }
+            guard isSafeCrashPath(candidate) else {
+                log("cleaner: crash logs path check failed \(candidate)")
+                return (candidate, true)
+            }
+            let fd = open(candidate, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+            if fd >= 0 {
+                close(fd)
+                return (candidate, false)
+            }
+            if errno == EPERM || errno == EACCES {
+                let grant = ContainerStore.grantContainerAccess(candidate)
+                defer { SandboxAccess.release(grant) }
+                let retry = open(candidate, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+                if retry >= 0 {
+                    close(retry)
+                    return (candidate, false)
+                }
+            }
+            log("cleaner: crash logs can't be read on this device (\(candidate))")
+            return (candidate, true)
+        }
+        return (candidatePaths[0], false)
+    }
+
     static func scan() -> CrashLogSummary {
-        let url = URL(fileURLWithPath: rootPath, isDirectory: true)
-        let grant = ContainerStore.grantContainerAccess(rootPath)
+        let resolved = resolvedRoot()
+        let url = URL(fileURLWithPath: resolved.path, isDirectory: true)
+        let grant = ContainerStore.grantContainerAccess(resolved.path)
         defer {
             if grant >= 0 { SandboxAccess.release(grant) }
         }
-        guard FileManager.default.fileExists(atPath: rootPath) else {
-            return CrashLogSummary(fileCount: 0, bytes: 0)
+        guard FileManager.default.fileExists(atPath: resolved.path) else {
+            return CrashLogSummary(fileCount: 0, bytes: 0, limited: false)
+        }
+        if resolved.limited {
+            return CrashLogSummary(fileCount: 0, bytes: 0, limited: true)
         }
         var count = 0
         var bytes: Int64 = 0
@@ -36,16 +109,18 @@ enum CrashLogCleaner {
             bytes += file.size
             if count >= maximumFiles { break }
         }
-        return CrashLogSummary(fileCount: count, bytes: bytes)
+        return CrashLogSummary(fileCount: count, bytes: bytes, limited: false)
     }
 
     static func clean() -> CrashLogCleanResult {
-        let url = URL(fileURLWithPath: rootPath, isDirectory: true)
-        let grant = ContainerStore.grantContainerAccess(rootPath)
+        let resolved = resolvedRoot()
+        let url = URL(fileURLWithPath: resolved.path, isDirectory: true)
+        let grant = ContainerStore.grantContainerAccess(resolved.path)
         defer {
             if grant >= 0 { SandboxAccess.release(grant) }
         }
-        guard FileManager.default.fileExists(atPath: rootPath) else {
+        guard FileManager.default.fileExists(atPath: resolved.path),
+              !resolved.limited else {
             return CrashLogCleanResult(removed: 0, failed: 0, freedBytes: 0)
         }
         var removed = 0

@@ -32,6 +32,18 @@
 				<string>com.NVD.1506.config-package</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Tệp ghép nối</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.property-list</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
@@ -58,22 +70,37 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>25</string>
+	<string>26</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>localdevvpn</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>MinimumOSVersion</key>
 	<string>16.0</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_remotepairing-pairable-host._tcp</string>
+		<string>_aircardprobe._tcp</string>
+	</array>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>NVD 1506 needs access to documents.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>NVD 1506 quảng cáo dịch vụ ghép nối trên thiết bị để iPhone này tự ghép nối với chính nó, và kết nối tới lockdown daemon cục bộ để chạy thao tác áp giao diện thẻ.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>NVD 1506 needs access to photos for wallpaper customization.</string>
+	<string>NVD 1506 cần quyền truy cập ảnh để tùy chỉnh hình nền và áp giao diện thẻ Wallet.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchScreen</key>

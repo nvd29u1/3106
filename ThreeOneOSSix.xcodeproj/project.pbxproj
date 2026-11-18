@@ -153,6 +153,8 @@
 		3106M201 /* MobileGestaltEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106M101; };
 		3106M202 /* KeypadThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106M102; };
 		3106C200 /* CrashLogCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106C100; };
+		3106C400 /* CleanerCustomTargets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106C300; };
+		3106C600 /* CleanerScanJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106C500; };
 		3106M203 /* KeypadThemeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106M103; };
 		3106S200 /* SQLiteViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106S100; };
 		3106S201 /* HexViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106S101; };
@@ -162,6 +164,17 @@
 		3105A234 /* AppDataBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105A105; };
 		3105A228 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3105A120; };
 		3105A211 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3105A031; };
+		3106W545A387222E169D23B0 /* AirliftFFI.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3106W5CD3961C5609518DAC4; };
+		3106W6FFEB9A6857994BFF9D /* WalletScanParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W515098F6A0D538E541E; };
+		3106W64BEACB8F7183A2D913 /* CardPhotoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W5267547D7BBABD23686; };
+		3106W612DF305895CCD49F2B /* CardPhotoCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W53043B93F69F0DB4EE8; };
+		3106W63C6CF565ACDFA35314 /* WalletCardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W52DF872E2A63042BF17; };
+		3106W64FEC3BC65BB2EC983B /* WalletModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W531DAFE3F373846C578; };
+		3106W61E57AA87EC9A7FA6AF /* PairingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W5C4126A3C79C09BF457; };
+		3106W648D92B6B313D3BBAC4 /* NetworkStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W52A5754733DD6953010; };
+		3106W659DB9A926890C0F783 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W5AB2EE844D3197446C8; };
+		3106W6BE597E7957B00C0CE7 /* GrappaHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 3106W5548ED12CD69C18F5F5; };
+		3106W6915AAD0D25823D79CD /* WalletCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W5BC64C4C6C98D05F13B; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -333,11 +346,25 @@
 		3106M101 /* MobileGestaltEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileGestaltEditorView.swift; sourceTree = "<group>"; };
 		3106M102 /* KeypadThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeypadThemeService.swift; sourceTree = "<group>"; };
 		3106C100 /* CrashLogCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashLogCleaner.swift; sourceTree = "<group>"; };
+		3106C300 /* CleanerCustomTargets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanerCustomTargets.swift; sourceTree = "<group>"; };
+		3106C500 /* CleanerScanJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanerScanJournal.swift; sourceTree = "<group>"; };
 		3106M103 /* KeypadThemeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeypadThemeView.swift; sourceTree = "<group>"; };
 		3106S100 /* SQLiteViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteViewerView.swift; sourceTree = "<group>"; };
 		3106S101 /* HexViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexViewerView.swift; sourceTree = "<group>"; };
 		3106S102 /* PlistEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistEditorView.swift; sourceTree = "<group>"; };
 		3106S103 /* FileInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInfoView.swift; sourceTree = "<group>"; };
+		3106W5CD3961C5609518DAC4 /* AirliftFFI.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = AirliftFFI.xcframework; sourceTree = "<group>"; };
+		3106W515098F6A0D538E541E /* WalletScanParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletScanParser.swift; sourceTree = "<group>"; };
+		3106W5267547D7BBABD23686 /* CardPhotoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPhotoPicker.swift; sourceTree = "<group>"; };
+		3106W53043B93F69F0DB4EE8 /* CardPhotoCropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPhotoCropView.swift; sourceTree = "<group>"; };
+		3106W52DF872E2A63042BF17 /* WalletCardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletCardStore.swift; sourceTree = "<group>"; };
+		3106W531DAFE3F373846C578 /* WalletModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletModels.swift; sourceTree = "<group>"; };
+		3106W5C4126A3C79C09BF457 /* PairingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingController.swift; sourceTree = "<group>"; };
+		3106W52A5754733DD6953010 /* NetworkStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkStatus.swift; sourceTree = "<group>"; };
+		3106W5AB2EE844D3197446C8 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		3106W5D0D57A286ED7254703 /* GrappaHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GrappaHelper.h; sourceTree = "<group>"; };
+		3106W5548ED12CD69C18F5F5 /* GrappaHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GrappaHelper.m; sourceTree = "<group>"; };
+		3106W5BC64C4C6C98D05F13B /* WalletCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletCardsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -345,6 +372,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3106W545A387222E169D23B0 /* AirliftFFI.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,6 +384,7 @@
 			children = (
 				3105A401 /* ThreeOneOSSix */,
 				3105A402 /* Products */,
+				3106W5CD3961C5609518DAC4 /* AirliftFFI.xcframework */,
 			);
 			sourceTree = "<group>";
 		};
@@ -370,6 +399,7 @@
 				3105A404 /* views */,
 				3105A405 /* helpers */,
 				3105A406 /* kexploit */,
+				3106W5AF6A4933C6E074A778 /* wallet */,
 				3106W032 /* ThreeOneOSSix.entitlements */,
 				3105A120 /* Localizable.strings */,
 				3105A031 /* Assets.xcassets */,
@@ -451,6 +481,7 @@
 				3106T314 /* MigrationResumeView.swift */,
 				3106T315 /* MigrationConfigBackupView.swift */,
 				3106N101 /* NotificationSoundView.swift */,
+				3106W5BC64C4C6C98D05F13B /* WalletCardsView.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -553,6 +584,8 @@
 				3106M100 /* MobileGestaltService.swift */,
 				3106M102 /* KeypadThemeService.swift */,
 				3106C100 /* CrashLogCleaner.swift */,
+				3106C300 /* CleanerCustomTargets.swift */,
+				3106C500 /* CleanerScanJournal.swift */,
 			);
 			path = helpers;
 			sourceTree = "<group>";
@@ -576,6 +609,23 @@
 				3105A097 /* xpaci.h */,
 			);
 			path = kexploit;
+			sourceTree = "<group>";
+		};
+		3106W5AF6A4933C6E074A778 /* wallet */ = {
+			isa = PBXGroup;
+			children = (
+				3106W515098F6A0D538E541E /* WalletScanParser.swift */,
+				3106W5267547D7BBABD23686 /* CardPhotoPicker.swift */,
+				3106W53043B93F69F0DB4EE8 /* CardPhotoCropView.swift */,
+				3106W52DF872E2A63042BF17 /* WalletCardStore.swift */,
+				3106W531DAFE3F373846C578 /* WalletModels.swift */,
+				3106W5C4126A3C79C09BF457 /* PairingController.swift */,
+				3106W52A5754733DD6953010 /* NetworkStatus.swift */,
+				3106W5AB2EE844D3197446C8 /* Utilities.swift */,
+				3106W5D0D57A286ED7254703 /* GrappaHelper.h */,
+				3106W5548ED12CD69C18F5F5 /* GrappaHelper.m */,
+			);
+			path = wallet;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -742,6 +792,8 @@
 				3106M202,
 				3106M203,
 				3106C200,
+				3106C400,
+				3106C600,
 				3106S200,
 				3106S201,
 				3106S202,
@@ -785,7 +837,17 @@
 				3106G208,
 				3106G207,
 				3106G205,
-			);
+				3106W6FFEB9A6857994BFF9D,
+				3106W64BEACB8F7183A2D913,
+				3106W612DF305895CCD49F2B,
+				3106W63C6CF565ACDFA35314,
+				3106W64FEC3BC65BB2EC983B,
+				3106W61E57AA87EC9A7FA6AF,
+				3106W648D92B6B313D3BBAC4,
+				3106W659DB9A926890C0F783,
+				3106W6BE597E7957B00C0CE7,
+				3106W6915AAD0D25823D79CD,
+		);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -809,8 +871,13 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "ThreeOneOSSix/ThreeOneOSSix.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ThreeOneOSSix/Info.plist;
@@ -827,7 +894,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 3.2.6;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = "-lz -lc++";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NVD.1506;
 				PRODUCT_NAME = 3106;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -844,8 +911,13 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "ThreeOneOSSix/ThreeOneOSSix.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ThreeOneOSSix/Info.plist;
@@ -862,7 +934,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 3.2.6;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = "-lz -lc++";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NVD.1506;
 				PRODUCT_NAME = 3106;
 				SWIFT_EMIT_LOC_STRINGS = YES;

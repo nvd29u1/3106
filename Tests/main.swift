@@ -327,6 +327,19 @@ struct LimitedCleanerUsage: Equatable {
     let cacheBytes: Int64
     let temporaryBytes: Int64
     let removableItemCount: Int
+    let limited: Bool
+
+    init(
+        cacheBytes: Int64,
+        temporaryBytes: Int64,
+        removableItemCount: Int,
+        limited: Bool = false
+    ) {
+        self.cacheBytes = cacheBytes
+        self.temporaryBytes = temporaryBytes
+        self.removableItemCount = removableItemCount
+        self.limited = limited
+    }
 
     var totalBytes: Int64 { cacheBytes + temporaryBytes }
 }
@@ -361,7 +374,7 @@ let cleanerRecords = CleanerCatalog.scanNewApplications(
     activateContainer: { $0.containerPath },
     isValidContainerPath: { _ in true },
     usageForContainer: { _ in
-        LimitedCleanerUsage(cacheBytes: 10, temporaryBytes: 2, removableItemCount: 1)
+        LimitedCleanerUsage(cacheBytes: 100_000, temporaryBytes: 2_000, removableItemCount: 1)
     },
     onApplication: { cleanerApplicationCallbacks.append($0) },
     onRecord: { cleanerRecordCallbacks.append($0.bundleID) }
@@ -387,6 +400,37 @@ let cleanerEmptyRecords = CleanerCatalog.scanNewApplications(
 expect(cleanerEmptyApplications.count == 1, "cleaner still reports an app with no removable data")
 expect(cleanerEmptyRecords.isEmpty, "cleaner does not return an empty record")
 expect(cleanerEmptyScanned.isEmpty, "cleaner does not mark an empty app as scanned")
+
+// 64 KB row threshold (WQFiles parity): a fully-measured row below 64 KB is
+// omitted, while a limited row is kept whatever its size.
+var cleanerThresholdScanned = Set<String>()
+let cleanerThresholdRecords = CleanerCatalog.scanNewApplications(
+    [cleanerApplications[0]],
+    scannedBundleIDs: &cleanerThresholdScanned,
+    shouldIncludeBundleID: { _ in true },
+    activateContainer: { $0.containerPath },
+    isValidContainerPath: { _ in true },
+    usageForContainer: { _ in
+        LimitedCleanerUsage(cacheBytes: 1_000, temporaryBytes: 2, removableItemCount: 1)
+    },
+    onApplication: { _ in },
+    onRecord: { _ in }
+)
+expect(cleanerThresholdRecords.isEmpty, "cleaner omits a fully-measured row below 64 KB")
+var cleanerLimitedScanned = Set<String>()
+let cleanerLimitedRecords = CleanerCatalog.scanNewApplications(
+    [cleanerApplications[0]],
+    scannedBundleIDs: &cleanerLimitedScanned,
+    shouldIncludeBundleID: { _ in true },
+    activateContainer: { $0.containerPath },
+    isValidContainerPath: { _ in true },
+    usageForContainer: { _ in
+        LimitedCleanerUsage(cacheBytes: 0, temporaryBytes: 0, removableItemCount: 0, limited: true)
+    },
+    onApplication: { _ in },
+    onRecord: { _ in }
+)
+expect(cleanerLimitedRecords.count == 1, "cleaner keeps a limited row even at 0 bytes")
 
 // LaunchServices fast container catalog: build, filter and disk cache.
 do {
