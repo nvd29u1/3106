@@ -178,6 +178,8 @@
 		3106PC020000000000000001 /* PasscodeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106PC010000000000000001; };
 		3106PC020000000000000002 /* PasscodeThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106PC010000000000000002; };
 		3106PC020000000000000003 /* PasscodeThemesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106PC010000000000000003; };
+		3106PD020000000000000001 /* PasscodeImageEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106PD010000000000000001; };
+		3106PD020000000000000002 /* PasscodeThemePackager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106PD010000000000000002; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -371,6 +373,8 @@
 		3106PC010000000000000001 /* PasscodeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodeModels.swift; sourceTree = "<group>"; };
 		3106PC010000000000000002 /* PasscodeThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodeThemeStore.swift; sourceTree = "<group>"; };
 		3106PC010000000000000003 /* PasscodeThemesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodeThemesView.swift; sourceTree = "<group>"; };
+		3106PD010000000000000001 /* PasscodeImageEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodeImageEngine.swift; sourceTree = "<group>"; };
+		3106PD010000000000000002 /* PasscodeThemePackager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodeThemePackager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -641,6 +645,8 @@
 			children = (
 				3106PC010000000000000001 /* PasscodeModels.swift */,
 				3106PC010000000000000002 /* PasscodeThemeStore.swift */,
+				3106PD010000000000000001 /* PasscodeImageEngine.swift */,
+				3106PD010000000000000002 /* PasscodeThemePackager.swift */,
 			);
 			path = passcode;
 			sourceTree = "<group>";
@@ -867,6 +873,8 @@
 				3106PC020000000000000001,
 				3106PC020000000000000002,
 				3106PC020000000000000003,
+				3106PD020000000000000001,
+				3106PD020000000000000002,
 		);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -891,7 +899,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "ThreeOneOSSix/ThreeOneOSSix.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -931,7 +939,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "ThreeOneOSSix/ThreeOneOSSix.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				FRAMEWORK_SEARCH_PATHS = (

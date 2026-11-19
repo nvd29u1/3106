@@ -5,10 +5,12 @@ import AirliftFFI
 
 // MARK: - PasscodeThemeStore
 //
-// Apply-only slice of AirCard's passcode flow (AppViewModel.swift
-// flashPassthm / loadPassthm, AirCard-iOS v1.3.2 MIT). No Theme Creator:
-// the only keys that ever flash are the ones read from a .passthm file
-// the user imported.
+// Apply + Theme Creator slice of AirCard's passcode flow
+// (AppViewModel.swift flashPassthm / loadPassthm, AirCard-iOS v1.3.2
+// MIT). Apply mode flashes keys read from a .passthm file the user
+// imported; creator mode flashes keys built in-app from a poster photo
+// or per-key photos (see "Theme Creator" below), and can export them
+// as a .passthm file via PasscodeThemePackager.
 //
 // Pairing / VPN infrastructure is NOT duplicated here: the store holds the
 // shared WalletCardStore (injected by the App) and reads its
@@ -40,6 +42,31 @@ final class PasscodeThemeStore: ObservableObject {
     @Published var loadedTheme: PasscodeThemeInfo? = nil
     @Published var documentsThemes: [String] = []
     @Published var lastAppliedThemeName: String? = nil
+
+    // MARK: - Theme Creator
+
+    @Published var passcodeMode: CreatorMode = .applyTheme
+    @Published var sliceMode: SliceMode = .posterSlice
+
+    // Poster slice
+    @Published var posterImage: UIImage? = nil
+    @Published var posterZoom: CGFloat = 1.0
+    @Published var posterOffset: CGPoint = .zero
+    @Published var maskToCircles: Bool = false
+    @Published var slicedKeys: [String: UIImage] = [:]
+
+    // Individual keys
+    @Published var customKeys: [String: UIImage] = [:]
+    @Published var rawIndividualImages: [String: UIImage] = [:]
+    // NOTE: individualOffsets / individualZooms have no UI mutating them
+    // in AirCard either (no per-key zoom/offset slider or drag) — they
+    // are state only, kept so updateIndividualKey stays faithful.
+    @Published var individualOffsets: [String: CGPoint] = [:]
+    @Published var individualZooms: [String: CGFloat] = [:]
+    @Published var selectedKeyDigit: String? = nil
+
+    @Published var exportedThemeURL: URL? = nil
+    @Published var showShareSheet: Bool = false
 
     // MARK: - Flash state (FlashPhase is shared with the Wallet flow)
 
@@ -157,26 +184,168 @@ final class PasscodeThemeStore: ObservableObject {
         passthmFlashLog.removeAll()
     }
 
-    /// Keys of the loaded theme (apply-only: no creator keys exist).
+    /// Keys that preview / flash / export right now. Apply mode uses the
+    /// loaded .passthm file; creator mode uses the sliced poster keys or
+    /// the per-key custom images, depending on the slice mode.
     var effectiveKeys: [String: UIImage] {
-        loadedTheme?.keysPreview ?? [:]
+        if passcodeMode == .themeCreator {
+            return sliceMode == .posterSlice ? slicedKeys : customKeys
+        }
+        return loadedTheme?.keysPreview ?? [:]
+    }
+
+    // MARK: - Theme Creator
+
+    func setPosterImage(_ img: UIImage) {
+        posterImage = img
+        posterZoom = 1.0
+        posterOffset = .zero
+        updatePosterSlicing()
+    }
+
+    func updatePosterSlicing() {
+        guard let img = posterImage else { slicedKeys = [:]; return }
+        slicedKeys = ImageEngine.slicePoster(
+            image: img,
+            zoom: posterZoom,
+            offset: posterOffset,
+            maskToCircles: maskToCircles
+        )
+    }
+
+    func setIndividualKey(digit: String, image: UIImage) {
+        rawIndividualImages[digit] = image
+        individualOffsets[digit] = .zero
+        individualZooms[digit] = 1.0
+        selectedKeyDigit = digit
+        updateIndividualKey(digit: digit)
+    }
+
+    func updateIndividualKey(digit: String) {
+        guard let raw = rawIndividualImages[digit] else { return }
+        let offset = individualOffsets[digit] ?? .zero
+        let zoom   = individualZooms[digit] ?? 1.0
+        if let cropped = ImageEngine.cropToCircle(
+            image: raw,
+            targetSize: CGSize(width: 225, height: 225),
+            circleDiameter: 222.0,
+            zoom: zoom,
+            offset: offset
+        ) {
+            customKeys[digit] = cropped
+        }
+    }
+
+    func clearIndividualKey(digit: String) {
+        customKeys.removeValue(forKey: digit)
+        rawIndividualImages.removeValue(forKey: digit)
+        individualOffsets.removeValue(forKey: digit)
+        individualZooms.removeValue(forKey: digit)
+        if selectedKeyDigit == digit { selectedKeyDigit = nil }
+    }
+
+    func clearAllCreator() {
+        posterImage = nil
+        posterZoom = 1.0
+        posterOffset = .zero
+        slicedKeys.removeAll()
+        customKeys.removeAll()
+        rawIndividualImages.removeAll()
+        individualOffsets.removeAll()
+        individualZooms.removeAll()
+        selectedKeyDigit = nil
+    }
+
+    /// Exports the creator keys as a .passthm file into tmp/ and opens
+    /// the share sheet for it. No pairing/VPN needed for export. The
+    /// file stays in tmp/ only (AirCard behavior) — it is NOT copied to
+    /// Documents automatically.
+    func exportPassthm() -> URL? {
+        let keys = effectiveKeys
+        guard !keys.isEmpty else {
+            errorMessage = AppLanguage.vietnamese.text("passcode.creator.export_no_keys")
+            return nil
+        }
+        do {
+            let zipData = try PasscodeThemePackager.buildPassthm(
+                keys: keys,
+                telephonyVersion: targetTelephonyVersion,
+                language: passcodeLanguageTarget,
+                bold: passcodeBoldTarget
+            )
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("NVD1506_Custom_\(Int(Date().timeIntervalSince1970)).passthm")
+            try zipData.write(to: tempURL)
+            self.exportedThemeURL = tempURL
+            self.showShareSheet = true
+            return tempURL
+        } catch {
+            errorMessage = AppLanguage.vietnamese.text("passcode.creator.export_failed", error.localizedDescription)
+            return nil
+        }
+    }
+
+    func resetPosterPosition() {
+        posterZoom = 1.0
+        posterOffset = .zero
+        updatePosterSlicing()
+    }
+
+    /// Copies the loaded theme's preview images into the creator as
+    /// per-key images (merges per digit — pre-existing custom keys for
+    /// other digits are kept). Uses the 512px-downsampled preview
+    /// UIImages, not full-res data; only one image per digit survives
+    /// (the reader keeps the first per digit; *# never survive).
+    func adoptThemeIntoCreator() {
+        guard let theme = loadedTheme else { return }
+        for (digit, img) in theme.keysPreview {
+            customKeys[digit] = img
+            rawIndividualImages[digit] = img
+            individualOffsets[digit] = .zero
+            individualZooms[digit] = 1.0
+        }
+        selectedKeyDigit = nil
+        sliceMode = .individualKeys
+        passcodeMode = .themeCreator
     }
 
     // MARK: - Passthm Flash
 
     var canFlashPassthm: Bool {
-        walletStore.hasPairingFile &&
-        passthmFlashPhase != .running &&
-        loadedTheme != nil &&
-        !(loadedTheme?.keysPreview.isEmpty ?? true)
+        guard walletStore.hasPairingFile, passthmFlashPhase != .running else { return false }
+        switch passcodeMode {
+        case .applyTheme:
+            return loadedTheme != nil && !(loadedTheme?.keysPreview.isEmpty ?? true)
+        case .themeCreator:
+            return !effectiveKeys.isEmpty
+        }
     }
 
     func flashPassthm() {
-        guard canFlashPassthm, let theme = loadedTheme else { return }
-        let keys = theme.keysPreview
-        let rawKeys = theme.rawKeyData
-        let themeFilePath = theme.filePath
-        let themeName = theme.name
+        guard canFlashPassthm else { return }
+
+        let isCreator = (passcodeMode == .themeCreator)
+        let keys: [String: UIImage]
+        let rawKeys: [String: Data]
+        let themeFilePath: String
+        let themeName: String
+
+        if isCreator {
+            keys = effectiveKeys
+            // CRITICAL: Never use rawKeyData from a previously loaded zip in creator mode!
+            rawKeys = [:]
+            // Creator keys have no source .passthm file, so the
+            // last-applied save below no-ops (empty path reads nothing).
+            themeFilePath = ""
+            themeName = ""
+        } else if let theme = loadedTheme {
+            keys = theme.keysPreview
+            rawKeys = theme.rawKeyData
+            themeFilePath = theme.filePath
+            themeName = theme.name
+        } else {
+            return
+        }
 
         guard !keys.isEmpty else {
             errorMessage = AppLanguage.vietnamese.text("passcode.flash.no_keys")
@@ -372,7 +541,11 @@ final class PasscodeThemeStore: ObservableObject {
                     }
                     self.flashResultMessage = AppLanguage.vietnamese.text("passcode.flash.success_alert")
                     self.showFlashAlert = true
-                    log("passcode: đã áp theme \(themeName)")
+                    if isCreator {
+                        log("passcode: đã áp theme tự tạo")
+                    } else {
+                        log("passcode: đã áp theme \(themeName)")
+                    }
                 } else {
                     self.passthmFlashPhase = .done(ok: false)
                     self.passthmFlashLog.append(AppLanguage.vietnamese.text("passcode.flash.done_failed"))

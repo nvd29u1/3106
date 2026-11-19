@@ -2,14 +2,15 @@ import Foundation
 import UIKit
 import AirliftFFI
 
-// MARK: - Passcode theme (.passthm) — apply-only slice
+// MARK: - Passcode theme (.passthm) — apply + Theme Creator
 //
 // Ported from AirCard-iOS v1.3.2 (Mak5er/AirCard-iOS, MIT), Models.swift.
-// Only the parts needed to LOAD and APPLY a local .passthm file are kept:
-// theme info, language/bold targets, keypad locales + layout, and the
-// .passthm reader. NOT ported: Theme Creator (per-key editor,
-// exportPassthm, slicePoster/cropToCircle, PasscodeThemePackager),
-// PosterBoard wallpapers, Wallet (already in the app), theme store.
+// Apply slice: theme info, language/bold targets, keypad locales +
+// layout, and the .passthm reader. Creator slice: CreatorMode /
+// SliceMode enums, ImageEngine slicePoster/cropToCircle (in
+// PasscodeImageEngine.swift) and PasscodeThemePackager (in
+// PasscodeThemePackager.swift). NOT ported: PosterBoard wallpapers,
+// Wallet (already in the app), theme store.
 //
 // A .passthm file is a plain ZIP (STORED entries, no manifest). Entry
 // names look like "<TelephonyUI-N>/<lang>-<digit>-<subtext>--white[-bold].png"
@@ -24,6 +25,34 @@ struct PasscodeThemeInfo: Identifiable {
     let fileCount: Int
     let keysPreview: [String: UIImage]
     var rawKeyData: [String: Data] = [:]
+}
+
+enum CreatorMode: String, CaseIterable, Identifiable {
+    case applyTheme = "Apply .passthm"
+    case themeCreator = "Create Theme"
+    var id: String { rawValue }
+
+    /// Key of the Vietnamese label (see vi.lproj/Localizable.strings).
+    var titleKey: String {
+        switch self {
+        case .applyTheme: return "passcode.mode.apply"
+        case .themeCreator: return "passcode.mode.create"
+        }
+    }
+}
+
+enum SliceMode: String, CaseIterable, Identifiable {
+    case posterSlice = "Poster Slice"
+    case individualKeys = "Individual Keys"
+    var id: String { rawValue }
+
+    /// Key of the Vietnamese label (see vi.lproj/Localizable.strings).
+    var titleKey: String {
+        switch self {
+        case .posterSlice: return "passcode.creator.slice_poster"
+        case .individualKeys: return "passcode.creator.slice_individual"
+        }
+    }
 }
 
 enum PasscodeLanguageTarget: String, CaseIterable, Identifiable {
