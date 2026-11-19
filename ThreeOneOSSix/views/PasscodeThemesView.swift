@@ -251,9 +251,9 @@ struct PasscodeThemesView: View {
         }
     }
 
+    @ViewBuilder
     private var posterSliceSection: some View {
-        Group {
-            Section(language.text("passcode.creator.poster_section")) {
+        Section(language.text("passcode.creator.poster_section")) {
                 Button {
                     showPosterSourceDialog = true
                 } label: {
@@ -382,7 +382,6 @@ struct PasscodeThemesView: View {
                     .padding(.vertical, 2)
                 }
             }
-        }
     }
 
     private var individualKeysSection: some View {
