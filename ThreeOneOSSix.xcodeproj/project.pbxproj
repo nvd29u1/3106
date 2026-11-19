@@ -175,6 +175,9 @@
 		3106W659DB9A926890C0F783 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W5AB2EE844D3197446C8; };
 		3106W6BE597E7957B00C0CE7 /* GrappaHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 3106W5548ED12CD69C18F5F5; };
 		3106W6915AAD0D25823D79CD /* WalletCardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106W5BC64C4C6C98D05F13B; };
+		3106PC020000000000000001 /* PasscodeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106PC010000000000000001; };
+		3106PC020000000000000002 /* PasscodeThemeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106PC010000000000000002; };
+		3106PC020000000000000003 /* PasscodeThemesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106PC010000000000000003; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -365,6 +368,9 @@
 		3106W5D0D57A286ED7254703 /* GrappaHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GrappaHelper.h; sourceTree = "<group>"; };
 		3106W5548ED12CD69C18F5F5 /* GrappaHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GrappaHelper.m; sourceTree = "<group>"; };
 		3106W5BC64C4C6C98D05F13B /* WalletCardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletCardsView.swift; sourceTree = "<group>"; };
+		3106PC010000000000000001 /* PasscodeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodeModels.swift; sourceTree = "<group>"; };
+		3106PC010000000000000002 /* PasscodeThemeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodeThemeStore.swift; sourceTree = "<group>"; };
+		3106PC010000000000000003 /* PasscodeThemesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodeThemesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -400,6 +406,7 @@
 				3105A405 /* helpers */,
 				3105A406 /* kexploit */,
 				3106W5AF6A4933C6E074A778 /* wallet */,
+				3106PC030000000000000001 /* passcode */,
 				3106W032 /* ThreeOneOSSix.entitlements */,
 				3105A120 /* Localizable.strings */,
 				3105A031 /* Assets.xcassets */,
@@ -482,6 +489,7 @@
 				3106T315 /* MigrationConfigBackupView.swift */,
 				3106N101 /* NotificationSoundView.swift */,
 				3106W5BC64C4C6C98D05F13B /* WalletCardsView.swift */,
+				3106PC010000000000000003 /* PasscodeThemesView.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -626,6 +634,15 @@
 				3106W5548ED12CD69C18F5F5 /* GrappaHelper.m */,
 			);
 			path = wallet;
+			sourceTree = "<group>";
+		};
+		3106PC030000000000000001 /* passcode */ = {
+			isa = PBXGroup;
+			children = (
+				3106PC010000000000000001 /* PasscodeModels.swift */,
+				3106PC010000000000000002 /* PasscodeThemeStore.swift */,
+			);
+			path = passcode;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -847,6 +864,9 @@
 				3106W659DB9A926890C0F783,
 				3106W6BE597E7957B00C0CE7,
 				3106W6915AAD0D25823D79CD,
+				3106PC020000000000000001,
+				3106PC020000000000000002,
+				3106PC020000000000000003,
 		);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -871,7 +891,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "ThreeOneOSSix/ThreeOneOSSix.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 27;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -911,7 +931,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "ThreeOneOSSix/ThreeOneOSSix.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 27;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				FRAMEWORK_SEARCH_PATHS = (

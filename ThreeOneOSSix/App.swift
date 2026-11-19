@@ -6,6 +6,7 @@ import AirliftFFI
 struct ThreeOneOSSixApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var walletStore: WalletCardStore
+    @StateObject private var passcodeStore: PasscodeThemeStore
     @StateObject private var patchDraftCoordinator = PatchDraftCoordinator()
     @StateObject private var fileOperationCoordinator = FileOperationCoordinator()
     @StateObject private var patchStore = PatchProjectStore()
@@ -32,7 +33,9 @@ struct ThreeOneOSSixApp: App {
         // Ensure the ALGetGrappaToken symbol is retained and linked into the binary
         // (the Rust side resolves it dynamically via dlsym).
         _ = ALGetGrappaToken(0, 0, 0, nil, 0, nil, nil, 0)
-        _walletStore = StateObject(wrappedValue: WalletCardStore())
+        let wallet = WalletCardStore()
+        _walletStore = StateObject(wrappedValue: wallet)
+        _passcodeStore = StateObject(wrappedValue: PasscodeThemeStore(walletStore: wallet))
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
         let appBuild = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
         log("app: NVD 1506 \(appVersion) (\(appBuild)) launching — iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) \(AppInfo.machineName)")
@@ -98,6 +101,7 @@ struct ThreeOneOSSixApp: App {
                 ContentView()
                     .environmentObject(appState)
                     .environmentObject(walletStore)
+                    .environmentObject(passcodeStore)
                     .environmentObject(patchDraftCoordinator)
                     .environmentObject(fileOperationCoordinator)
                     .environmentObject(patchStore)
@@ -174,6 +178,15 @@ struct ThreeOneOSSixApp: App {
                 checkForUpdateThrottled()
             }
             .onOpenURL { url in
+                // .passthm themes route to the passcode store (never to the
+                // patch importer); the store copies the file into Documents
+                // synchronously, so security-scoped access is held here.
+                if url.isFileURL, url.pathExtension.lowercased() == "passthm" {
+                    let isSecured = url.startAccessingSecurityScopedResource()
+                    defer { if isSecured { url.stopAccessingSecurityScopedResource() } }
+                    passcodeStore.loadPassthm(url: url)
+                    return
+                }
                 // Config backup packages (.3106cfg) route to the migration
                 // importer; everything else stays on the patch-package path.
                 if url.isFileURL,

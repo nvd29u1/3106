@@ -6,9 +6,11 @@ import AirliftFFI
 // MARK: - WalletCardStore
 //
 // Wallet-only slice extracted from the upstream monolithic AppViewModel
-// (pairing + network + card scan/flash). Passcode themes, Tendies
-// wallpapers and the tab state were NOT copied. Rust log lines are routed
-// by ThreeOneOSSixApp into the shared log() sink instead of a local array.
+// (pairing + network + card scan/flash). Passcode themes live in
+// passcode/PasscodeThemeStore.swift (apply-only), which holds a reference
+// to this store for pairing/VPN. Tendies wallpapers and the tab state
+// were NOT copied. Rust log lines are routed by ThreeOneOSSixApp into
+// the shared log() sink instead of a local array.
 
 @MainActor
 final class WalletCardStore: ObservableObject {

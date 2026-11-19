@@ -11,6 +11,7 @@ enum AppSection: Int, CaseIterable, Identifiable {
     case wallpapers
     case backup
     case walletCards
+    case passcodeThemes
 
     var id: Int { rawValue }
 }
@@ -28,6 +29,7 @@ extension AppSection {
         case .wallpapers: return "tab.wallpapers"
         case .backup: return "tab.backup"
         case .walletCards: return "tab.walletcards"
+        case .passcodeThemes: return "tab.passcodethemes"
         }
     }
 
@@ -43,6 +45,7 @@ extension AppSection {
         case .wallpapers: return "photo.on.rectangle.angled"
         case .backup: return "externaldrive.badge.timemachine"
         case .walletCards: return "creditcard"
+        case .passcodeThemes: return "lock.circle.fill"
         }
     }
 }

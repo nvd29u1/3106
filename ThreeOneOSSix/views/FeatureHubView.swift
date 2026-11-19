@@ -112,6 +112,16 @@ struct FeatureHubView: View {
                             icon: "creditcard"
                         )
                     }
+
+                    NavigationLink {
+                        PasscodeThemesView()
+                    } label: {
+                        card(
+                            "home.card.passcode",
+                            detail: "home.card.passcode_detail",
+                            icon: "lock.circle.fill"
+                        )
+                    }
                 } header: {
                     Text(language.text("home.section.device"))
                 }

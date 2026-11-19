@@ -188,6 +188,8 @@ struct ContentView: View {
             )
         case .walletCards:
             WalletCardsView()
+        case .passcodeThemes:
+            PasscodeThemesView()
         }
     }
 
