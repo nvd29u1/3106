@@ -354,17 +354,18 @@ final class PasscodeThemeStore: ObservableObject {
             // backup exists — see the BACKUP note at the top of this file).
             var savedLastApplied = false
             if allOk, let data = try? Data(contentsOf: URL(fileURLWithPath: themeFilePath)), !data.isEmpty {
-                if (try? data.write(to: Self.lastAppliedFileURL, options: .atomic)) != nil {
+                if (try? data.write(to: await Self.lastAppliedFileURL, options: .atomic)) != nil {
                     savedLastApplied = true
                 }
             }
+            let didSaveLastApplied = savedLastApplied
 
             await MainActor.run {
                 if allOk {
                     self.passthmFlashProgress = 1.0
                     self.passthmFlashPhase = .done(ok: true)
                     self.passthmFlashLog.append(AppLanguage.vietnamese.text("passcode.flash.done_success"))
-                    if savedLastApplied {
+                    if didSaveLastApplied {
                         self.lastAppliedThemeName = themeName
                         UserDefaults.standard.set(themeName, forKey: Self.lastAppliedNameDefaultsKey)
                         self.scanDocumentsDirectory()
